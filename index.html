@@ -7,7 +7,7 @@
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <title>Cupra e-HYBRID · Control de Gastos y Km</title>
+  <title>Cupra e-HYBRID · Leasing, Gastos y Km</title>
   <link id="pwa-manifest" rel="manifest" href="" />
   <style>
     :root {
@@ -97,9 +97,7 @@
       cursor: pointer;
     }
 
-    .odo-pill strong {
-      color: var(--bbva-cyan);
-    }
+    .odo-pill strong { color: var(--bbva-cyan); }
 
     /* SELECTOR DE PERIODO */
     .period-bar {
@@ -165,9 +163,7 @@
       margin-top: 2px;
     }
 
-    .km-badge {
-      text-align: right;
-    }
+    .km-badge { text-align: right; }
 
     .km-badge .km-val {
       font-size: 16px;
@@ -242,7 +238,7 @@
     }
 
     .energy-meta {
-      font-size: 11.5px;
+      font-size: 11px;
       color: var(--text-muted);
       line-height: 1.35;
     }
@@ -257,17 +253,10 @@
       margin-bottom: 14px;
     }
 
-    .ratio-gas {
-      background: var(--fuel-amber);
-      transition: width 0.3s ease;
-    }
+    .ratio-gas { background: var(--fuel-amber); transition: width 0.3s ease; }
+    .ratio-ev { background: var(--bbva-cyan-dark); transition: width 0.3s ease; }
 
-    .ratio-ev {
-      background: var(--bbva-cyan-dark);
-      transition: width 0.3s ease;
-    }
-
-    /* KPIS DE EFICIENCIA (2x2 GRID PARA CONSUMO REAL) */
+    /* KPIS DE EFICIENCIA */
     .kpi-strip {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -297,12 +286,93 @@
       margin-top: 2px;
     }
 
+    /* TARJETA BONO WAYLET & TARJETA LEASING */
+    .bono-card {
+      background: linear-gradient(135deg, #072146 0%, #0D356B 100%);
+      color: #FFFFFF;
+      border-radius: var(--radius-lg);
+      padding: 15px 16px;
+      margin-top: 12px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .leasing-home-card {
+      background: #FFFFFF;
+      border: 1px solid var(--border-light);
+      border-left: 4px solid var(--bbva-cyan-dark);
+      border-radius: var(--radius-lg);
+      padding: 14px 16px;
+      margin-top: 12px;
+      box-shadow: var(--shadow-sm);
+      cursor: pointer;
+    }
+
+    .bono-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .bono-title {
+      font-size: 13px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .bono-title span.pill-tag {
+      background: rgba(45, 204, 205, 0.2);
+      color: var(--bbva-cyan);
+      font-size: 10.5px;
+      padding: 2px 8px;
+      border-radius: 999px;
+    }
+
+    .bono-edit-btn {
+      background: rgba(255, 255, 255, 0.14);
+      border: none;
+      color: #FFFFFF;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 999px;
+      cursor: pointer;
+    }
+
+    .bono-track {
+      height: 10px;
+      background: rgba(255, 255, 255, 0.18);
+      border-radius: 999px;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+
+    .bono-fill {
+      height: 100%;
+      background: var(--bbva-cyan);
+      border-radius: 999px;
+      transition: width 0.3s ease;
+    }
+
+    .bono-fill.exceeded { background: var(--fuel-amber); }
+
+    .bono-stats {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: #CBD5E1;
+    }
+
+    .bono-stats strong { color: #FFFFFF; }
+
     /* BOTONES ACCIÓN RÁPIDA */
     .quick-actions {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 10px;
-      margin: 16px 0;
+      margin: 14px 0;
     }
 
     .btn-action {
@@ -514,6 +584,11 @@
       color: var(--success);
     }
 
+    .mini-badge.bono {
+      background: var(--bbva-cyan-soft);
+      color: var(--bbva-cyan-dark);
+    }
+
     .tx-right {
       text-align: right;
       flex-shrink: 0;
@@ -597,20 +672,44 @@
       text-align: center;
     }
 
-    /* MANTENIMIENTO */
-    .maint-item { margin-bottom: 14px; }
-    .maint-item:last-child { margin-bottom: 0; }
-
-    .maint-head {
-      display: flex;
-      justify-content: space-between;
-      font-size: 13px;
-      font-weight: 600;
-      margin-bottom: 6px;
+    /* LEASING TRACKER */
+    .leasing-hero-numbers {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 14px;
     }
 
+    .leasing-stat-box {
+      background: var(--bg-app);
+      padding: 12px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-light);
+    }
+
+    .leasing-stat-box.accent {
+      background: var(--bbva-cyan-soft);
+      border-color: rgba(2, 132, 132, 0.3);
+    }
+
+    .leasing-stat-box .lbl {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .leasing-stat-box .val {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--bbva-navy);
+      margin-top: 2px;
+    }
+
+    .leasing-stat-box.accent .val { color: var(--bbva-cyan-dark); }
+
     .progress-track {
-      height: 10px;
+      height: 12px;
       background: #E2E8F0;
       border-radius: 999px;
       overflow: hidden;
@@ -626,12 +725,28 @@
     .progress-fill.warn { background: var(--fuel-amber); }
     .progress-fill.danger { background: var(--danger); }
 
-    .maint-sub {
-      display: flex;
-      justify-content: space-between;
-      font-size: 11.5px;
-      color: var(--text-muted);
-      margin-top: 4px;
+    .pace-banner {
+      margin-top: 14px;
+      padding: 12px;
+      border-radius: var(--radius-md);
+      font-size: 12.5px;
+      line-height: 1.45;
+      font-weight: 600;
+      background: #ECFDF3;
+      border: 1px solid #A6F4C5;
+      color: #065F46;
+    }
+
+    .pace-banner.warn {
+      background: var(--fuel-amber-soft);
+      border-color: rgba(230, 126, 34, 0.4);
+      color: #9A3412;
+    }
+
+    .pace-banner.danger {
+      background: #FEF2F2;
+      border-color: #FECACA;
+      color: #991B1B;
     }
 
     /* NAVEGACIÓN INFERIOR (5 TABS) */
@@ -797,11 +912,22 @@
       background: var(--bbva-cyan-soft);
       color: var(--bbva-cyan-dark);
       border: 1px solid rgba(2, 132, 132, 0.25);
-      padding: 4px 10px;
+      padding: 5px 10px;
       border-radius: 999px;
       font-size: 11.5px;
       font-weight: 600;
       cursor: pointer;
+    }
+
+    .bono-helper-box {
+      background: var(--bbva-cyan-soft);
+      border: 1px solid rgba(2, 132, 132, 0.3);
+      color: var(--bbva-navy);
+      padding: 10px 12px;
+      border-radius: 10px;
+      font-size: 12px;
+      margin-bottom: 12px;
+      line-height: 1.4;
     }
 
     .btn-submit {
@@ -845,7 +971,7 @@
     <div class="container">
       <div class="header-top">
         <div class="brand-title">
-          <span class="tag">Cupra León e-HYBRID</span>
+          <span class="tag">Cupra León e-HYBRID · Leasing</span>
           <h1>Control de Energía y Km</h1>
         </div>
         <div class="odo-pill" onclick="openOdoModal()" title="Actualizar odómetro">
@@ -897,7 +1023,7 @@
               <span class="energy-pct" id="ev-pct">0%</span>
             </div>
             <div class="energy-amount" id="ev-spent">0,00 €</div>
-            <div class="energy-meta" id="ev-meta">0,0 kWh · Media 0,00 €/kWh</div>
+            <div class="energy-meta" id="ev-meta">0,0 kWh · Suscripción + extra</div>
           </div>
         </div>
 
@@ -928,6 +1054,39 @@
         </div>
       </div>
 
+      <!-- RESUMEN RÁPIDO LEASING 25.000 KM -->
+      <div class="leasing-home-card" onclick="switchTab('leasing')">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+          <span style="font-size:12.5px; font-weight:700; color:var(--bbva-navy);">📄 Cupo Anual Leasing (25.000 km)</span>
+          <span style="font-size:12px; font-weight:800; color:var(--bbva-cyan-dark);" id="home-leasing-rem">Quedan 25.000 km</span>
+        </div>
+        <div class="progress-track" style="height:8px;">
+          <div class="progress-fill" id="home-leasing-fill" style="width:0%"></div>
+        </div>
+        <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--text-muted); margin-top:5px;">
+          <span id="home-leasing-used">Consumidos: 0 km (0%)</span>
+          <span>Ver proyección →</span>
+        </div>
+      </div>
+
+      <!-- TARJETA SUSCRIPCIÓN WAYLET 150 kWh -->
+      <div class="bono-card" id="bono-card">
+        <div class="bono-top">
+          <div class="bono-title">
+            <span>🔌 Bono Waylet Repsol</span>
+            <span class="pill-tag" id="bono-plan-badge">150 kWh · 50,40 €/mes</span>
+          </div>
+          <button class="bono-edit-btn" onclick="openWayletModal()">Ajustar plan</button>
+        </div>
+        <div class="bono-track">
+          <div class="bono-fill" id="bono-fill" style="width: 0%"></div>
+        </div>
+        <div class="bono-stats">
+          <span id="bono-used-lbl">Consumidos: <strong>0,0 kWh</strong></span>
+          <span id="bono-rem-lbl">Quedan: <strong>150,0 kWh</strong></span>
+        </div>
+      </div>
+
       <!-- BOTONES DE REGISTRO RÁPIDO -->
       <div class="quick-actions">
         <button class="btn-action btn-gas" onclick="openEntryModal('gas')">
@@ -945,7 +1104,7 @@
       <div class="card">
         <div class="chart-legend">
           <span><i class="legend-dot" style="background: var(--fuel-amber);"></i>Gasolina</span>
-          <span><i class="legend-dot" style="background: var(--bbva-cyan-dark);"></i>Recarga Eléctrica</span>
+          <span><i class="legend-dot" style="background: var(--bbva-cyan-dark);"></i>Recarga (Bono + Extra)</span>
         </div>
         <div id="monthly-chart" class="bar-chart-grid"></div>
       </div>
@@ -992,15 +1151,15 @@
           </div>
           <div class="form-group">
             <label>Precio Gasolina (€/L)</label>
-            <input type="number" id="trip-gas-price" step="0.001" oninput="calculateTrip()" />
+            <input type="number" id="trip-gas-price" step="0.001" oninput="this.dataset.touched='1'; calculateTrip()" />
           </div>
           <div class="form-group">
             <label>Tarifa Eléctrica (€/kWh)</label>
-            <input type="number" id="trip-ev-price" step="0.001" oninput="calculateTrip()" />
+            <input type="number" id="trip-ev-price" step="0.001" value="0.336" oninput="this.dataset.touched='1'; calculateTrip()" />
           </div>
           <div class="form-group">
-            <label>Autonomía EV real (km)</label>
-            <input type="number" id="trip-ev-range" value="55" oninput="calculateTrip()" />
+            <label>Autonomía EV 20 kWh (km)</label>
+            <input type="number" id="trip-ev-range" value="100" oninput="calculateTrip()" />
           </div>
           <div class="form-group">
             <label>Consumo Híbrido (L/100)</label>
@@ -1015,7 +1174,7 @@
             <div class="trip-detail" id="trip-det-hybrid">0,0 L gasolina</div>
           </div>
           <div class="trip-box highlight">
-            <h5>Saliendo al 100% EV</h5>
+            <h5>Saliendo al 100% (20 kWh)</h5>
             <div class="trip-cost" id="trip-cost-ev">0,00 €</div>
             <div class="trip-detail" id="trip-det-ev">0 km EV + 0 km híbrido</div>
           </div>
@@ -1027,13 +1186,13 @@
       </div>
     </section>
 
-    <!-- VISTA 4: MANTENIMIENTO -->
-    <section id="view-maint" class="view-section">
+    <!-- VISTA 4: CONTROL DE LEASING ANUAL -->
+    <section id="view-leasing" class="view-section">
       <div class="section-title">
-        <span>Control de Mantenimiento</span>
-        <button class="tx-btn" onclick="openMaintModal()">Configurar</button>
+        <span>Control de Kilómetros Leasing</span>
+        <button class="tx-btn" onclick="openLeasingModal()">Configurar contrato</button>
       </div>
-      <div class="card" id="maint-container"></div>
+      <div class="card" id="leasing-container"></div>
     </section>
 
     <!-- VISTA 5: DATOS Y BACKUP -->
@@ -1084,8 +1243,8 @@
       <span>🛣️ Viajes</span>
       <span class="nav-dot"></span>
     </button>
-    <button class="nav-btn" id="nav-maint" onclick="switchTab('maint')">
-      <span>🔧 Taller</span>
+    <button class="nav-btn" id="nav-leasing" onclick="switchTab('leasing')">
+      <span>📄 Leasing</span>
       <span class="nav-dot"></span>
     </button>
     <button class="nav-btn" id="nav-data" onclick="switchTab('data')">
@@ -1108,16 +1267,30 @@
         <div class="form-grid">
           <div class="form-group">
             <label>Fecha</label>
-            <input type="date" id="entry-date" required />
+            <input type="date" id="entry-date" required onchange="recalcEvBonoPreview()" />
           </div>
           <div class="form-group">
             <label>Odómetro (km totales)</label>
             <input type="number" id="entry-odo" step="1" required placeholder="Ej. 18450" />
           </div>
 
+          <!-- CAMPOS EXTRA RECARGA (BATERÍA 20 KWH ARRIBA PARA AUTOCALCULAR) -->
+          <div id="ev-top-fields" class="form-group full" style="display:none; margin-bottom: 0;">
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Batería Inicial (%)</label>
+                <input type="number" id="entry-bat-start" min="0" max="100" placeholder="Ej. 15" oninput="calcKwhFromBattery()" />
+              </div>
+              <div class="form-group">
+                <label>Batería Final (%)</label>
+                <input type="number" id="entry-bat-end" min="0" max="100" placeholder="Ej. 100" oninput="calcKwhFromBattery()" />
+              </div>
+            </div>
+          </div>
+
           <div class="form-group">
             <label id="label-qty">Litros (L)</label>
-            <input type="number" id="entry-qty" step="0.01" required placeholder="0.00" oninput="calcTotalFromUnit()" />
+            <input type="number" id="entry-qty" step="0.01" required placeholder="0.00" oninput="handleQtyInput()" />
           </div>
           <div class="form-group">
             <label id="label-unit-price">Precio (€/L)</label>
@@ -1125,8 +1298,13 @@
           </div>
 
           <div class="form-group full">
-            <label>Importe Total (€)</label>
+            <label id="label-total">Importe Total (€)</label>
             <input type="number" id="entry-total" step="0.01" required placeholder="0.00" oninput="calcUnitFromTotal()" />
+          </div>
+
+          <!-- AVISO BONO WAYLET EN RECARGAS -->
+          <div class="form-group full" id="ev-bono-preview" style="display:none;">
+            <div class="bono-helper-box" id="ev-bono-preview-text"></div>
           </div>
 
           <div class="form-group full">
@@ -1144,37 +1322,69 @@
               <input type="checkbox" id="entry-full-tank" />
               <span>Depósito lleno (calcula L/100 km reales)</span>
             </label>
-            <label>Estación de servicio</label>
-            <input type="text" id="entry-station" placeholder="Ej. Repsol, Ballenoil..." />
+            <label>Gasolinera</label>
+            <input type="text" id="entry-station" placeholder="Ej. EsclatOil, BonÀrea, Repsol..." />
             <div class="chip-row">
+              <button type="button" class="preset-chip" onclick="setStation('EsclatOil')">⛽ EsclatOil</button>
+              <button type="button" class="preset-chip" onclick="setStation('Low-Cost / Más barata')">🏷️ Más barata</button>
               <button type="button" class="preset-chip" onclick="setStation('Repsol (Waylet)')">Repsol (Waylet)</button>
-              <button type="button" class="preset-chip" onclick="setStation('Estación Low-Cost')">Low-Cost</button>
             </div>
           </div>
 
           <!-- CAMPOS EXTRA RECARGA -->
           <div id="ev-extra-fields" class="form-group full" style="display:none;">
-            <div class="form-grid">
-              <div class="form-group">
-                <label>Batería Inicial (%)</label>
-                <input type="number" id="entry-bat-start" min="0" max="100" placeholder="Ej. 15" />
-              </div>
-              <div class="form-group">
-                <label>Batería Final (%)</label>
-                <input type="number" id="entry-bat-end" min="0" max="100" placeholder="Ej. 100" />
-              </div>
-            </div>
+            <label class="checkbox-row" style="margin-bottom: 12px;">
+              <input type="checkbox" id="entry-use-bono" checked onchange="recalcEvBonoPreview()" />
+              <span>Descontar del Bono Waylet (150 kWh/mes)</span>
+            </label>
             <label>Punto de Recarga</label>
-            <input type="text" id="entry-charger" placeholder="Ej. Casa, Waylet Repsol..." />
+            <input type="text" id="entry-charger" placeholder="Ej. Repsol Waylet, Casa..." />
             <div class="chip-row">
-              <button type="button" class="preset-chip" onclick="setCharger('Casa (Tarifa Valle)')">🏠 Casa</button>
-              <button type="button" class="preset-chip" onclick="setCharger('Waylet / Repsol')">🔌 Waylet / Repsol</button>
-              <button type="button" class="preset-chip" onclick="setCharger('Cargador Público')">⚡ Público</button>
+              <button type="button" class="preset-chip" onclick="selectRepsolCharger()">🔌 Repsol (Waylet)</button>
+              <button type="button" class="preset-chip" onclick="selectOtherCharger('Casa')">🏠 Casa</button>
+              <button type="button" class="preset-chip" onclick="selectOtherCharger('Cargador Público')">⚡ Público</button>
             </div>
           </div>
         </div>
 
         <button type="submit" class="btn-submit">Guardar Registro</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL CONFIGURAR SUSCRIPCIÓN WAYLET -->
+  <div class="modal-backdrop" id="waylet-modal">
+    <div class="modal-sheet">
+      <div class="modal-header">
+        <h3>Suscripción Waylet Repsol</h3>
+        <button class="close-btn" onclick="closeModal('waylet-modal')">×</button>
+      </div>
+      <form onsubmit="saveWayletConfig(event)">
+        <div class="form-group">
+          <label class="checkbox-row">
+            <input type="checkbox" id="waylet-active" />
+            <span>Suscripción mensual activa (sumar al gasto EV)</span>
+          </label>
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Cuota mensual (€)</label>
+            <input type="number" id="waylet-fee" step="0.01" required />
+          </div>
+          <div class="form-group">
+            <label>kWh incluidos / mes</label>
+            <input type="number" id="waylet-kwh" step="1" required />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Precio Repsol fuera de bono (€/kWh)</label>
+          <input type="number" id="waylet-extra-rate" step="0.001" required />
+        </div>
+        <div class="form-group">
+          <label>Capacidad batería coche (kWh)</label>
+          <input type="number" id="car-battery-kwh" step="0.1" required />
+        </div>
+        <button type="submit" class="btn-submit">Guardar Plan Waylet</button>
       </form>
     </div>
   </div>
@@ -1196,31 +1406,31 @@
     </div>
   </div>
 
-  <!-- MODAL CONFIGURAR MANTENIMIENTO -->
-  <div class="modal-backdrop" id="maint-modal">
+  <!-- MODAL CONFIGURAR LEASING ANUAL -->
+  <div class="modal-backdrop" id="leasing-modal">
     <div class="modal-sheet">
       <div class="modal-header">
-        <h3>Configurar Intervalos de Taller</h3>
-        <button class="close-btn" onclick="closeModal('maint-modal')">×</button>
+        <h3>Configurar Contrato Leasing Anual</h3>
+        <button class="close-btn" onclick="closeModal('leasing-modal')">×</button>
       </div>
-      <form onsubmit="saveMaintConfig(event)">
+      <form onsubmit="saveLeasingConfig(event)">
         <div class="form-group">
-          <label>Última Revisión / Cambio de Aceite (km)</label>
-          <input type="number" id="maint-oil-last" required />
+          <label>Kilómetros contratados al año</label>
+          <input type="number" id="leasing-limit" value="25000" required />
         </div>
         <div class="form-group">
-          <label>Intervalo Revisión (cada cuántos km)</label>
-          <input type="number" id="maint-oil-int" value="15000" required />
+          <label>Odómetro al recoger el coche (km)</label>
+          <input type="number" id="leasing-start-odo" value="0" required />
         </div>
         <div class="form-group">
-          <label>Último Cambio de Neumáticos (km)</label>
-          <input type="number" id="maint-tires-last" required />
+          <label>Fecha de entrega / inicio contrato anual</label>
+          <input type="date" id="leasing-start-date" required />
         </div>
         <div class="form-group">
-          <label>Intervalo Neumáticos (cada cuántos km)</label>
-          <input type="number" id="maint-tires-int" value="40000" required />
+          <label>Coste por km extra (opcional, €/km)</label>
+          <input type="number" id="leasing-extra-cost" step="0.01" placeholder="Ej. 0.08" />
         </div>
-        <button type="submit" class="btn-submit">Guardar Configuración</button>
+        <button type="submit" class="btn-submit">Guardar Contrato Leasing</button>
       </form>
     </div>
   </div>
@@ -1231,7 +1441,7 @@
       const svgIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="110" fill="#072146"/><path d="M278 96L154 276h104l-24 140 124-180H254l24-140z" fill="#2DCCCD"/></svg>`;
       const iconUrl = 'data:image/svg+xml;base64,' + btoa(svgIcon);
       const manifest = {
-        name: 'Cupra e-HYBRID · Gastos y Km',
+        name: 'Cupra e-HYBRID · Leasing y Gastos',
         short_name: 'Cupra e-HYBRID',
         start_url: '.',
         display: 'standalone',
@@ -1243,16 +1453,23 @@
       document.getElementById('pwa-manifest').href = URL.createObjectURL(blob);
     })();
 
-    // ESTADO DE LA APLICACIÓN (COMPATIBLE CON V1)
+    // ESTADO DE LA APLICACIÓN (COMPATIBLE CON VERSIONES ANTERIORES)
     const STORAGE_KEY = 'cupra_ehybrid_data_v1';
     let appState = {
       entries: [],
       manualOdo: 0,
-      maint: {
-        oilLast: 0,
-        oilInterval: 15000,
-        tiresLast: 0,
-        tiresInterval: 40000
+      leasing: {
+        annualLimit: 25000,
+        startOdo: 0,
+        startDate: new Date().toISOString().split('T')[0],
+        extraKmCost: 0.08
+      },
+      waylet: {
+        active: true,
+        fee: 50.40,
+        includedKwh: 150,
+        extraRate: 0.38,
+        batteryKwh: 20
       }
     };
     let historyFilter = 'all';
@@ -1261,7 +1478,13 @@
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
         try {
-          appState = { ...appState, ...JSON.parse(saved) };
+          const parsed = JSON.parse(saved);
+          appState = {
+            ...appState,
+            ...parsed,
+            leasing: { ...appState.leasing, ...(parsed.leasing || {}) },
+            waylet: { ...appState.waylet, ...(parsed.waylet || {}) }
+          };
         } catch (e) { console.error(e); }
       }
       const now = new Date();
@@ -1289,6 +1512,21 @@
       renderAll();
     }
 
+    // CALCULAR CONSUMO DEL BONO WAYLET EN UN MES DADO (YYYY-MM)
+    function getWayletMonthStats(ym, excludeEntryId = null) {
+      const w = appState.waylet;
+      const monthEvEntries = appState.entries.filter(e =>
+        e.type === 'ev' &&
+        e.date.startsWith(ym) &&
+        e.id !== excludeEntryId &&
+        (e.useBono !== false)
+      );
+      const usedKwh = monthEvEntries.reduce((sum, e) => sum + (Number(e.qty) || 0), 0);
+      const remainingKwh = Math.max(0, w.includedKwh - usedKwh);
+      const exceededKwh = Math.max(0, usedKwh - w.includedKwh);
+      return { usedKwh, remainingKwh, exceededKwh };
+    }
+
     function renderAll() {
       const currentOdo = getCurrentOdometer();
       document.getElementById('header-odo').textContent = currentOdo.toLocaleString('es-ES') + ' km';
@@ -1296,28 +1534,38 @@
       const mode = document.getElementById('period-mode').value;
       const selectedMonth = document.getElementById('month-picker').value;
       const sorted = [...appState.entries].sort((a, b) => a.date.localeCompare(b.date) || a.odo - b.odo);
+      const w = appState.waylet;
 
       let filtered = sorted;
+      let subscriptionCostInPeriod = 0;
+
       if (mode === 'month' && selectedMonth) {
         filtered = sorted.filter(e => e.date.startsWith(selectedMonth));
         document.getElementById('summary-period-label').textContent = 'Gasto del Mes';
+        if (w.active) subscriptionCostInPeriod = Number(w.fee) || 0;
       } else {
         document.getElementById('summary-period-label').textContent = 'Gasto Acumulado Total';
+        if (w.active) {
+          const distinctMonths = new Set(sorted.map(e => e.date.slice(0, 7)));
+          if (selectedMonth) distinctMonths.add(selectedMonth);
+          subscriptionCostInPeriod = distinctMonths.size * (Number(w.fee) || 0);
+        }
       }
 
       let gasTotal = 0, gasLiters = 0;
-      let evTotal = 0, evKwh = 0;
+      let evExtraTotal = 0, evKwh = 0;
 
       filtered.forEach(e => {
         if (e.type === 'gas') {
           gasTotal += Number(e.total) || 0;
           gasLiters += Number(e.qty) || 0;
         } else {
-          evTotal += Number(e.total) || 0;
+          evExtraTotal += Number(e.total) || 0;
           evKwh += Number(e.qty) || 0;
         }
       });
 
+      const evTotal = subscriptionCostInPeriod + evExtraTotal;
       const grandTotal = gasTotal + evTotal;
       const gasPct = grandTotal > 0 ? Math.round((gasTotal / grandTotal) * 100) : 0;
       const evPct = grandTotal > 0 ? 100 - gasPct : 0;
@@ -1329,13 +1577,34 @@
       document.getElementById('ev-pct').textContent = evPct + '%';
 
       const avgGasPrice = gasLiters > 0 ? gasTotal / gasLiters : 0;
-      const avgEvPrice = evKwh > 0 ? evTotal / evKwh : 0;
-
       document.getElementById('gas-meta').textContent = `${fmtNum(gasLiters, 2)} L · Media ${fmtNum(avgGasPrice, 3)} €/L`;
-      document.getElementById('ev-meta').textContent = `${fmtNum(evKwh, 1)} kWh · Media ${fmtNum(avgEvPrice, 3)} €/kWh`;
+
+      if (w.active) {
+        document.getElementById('ev-meta').textContent = `${fmtNum(evKwh, 1)} kWh · Bono ${fmtEur(subscriptionCostInPeriod)} + ${fmtEur(evExtraTotal)} extra`;
+      } else {
+        const avgEvPrice = evKwh > 0 ? evTotal / evKwh : 0;
+        document.getElementById('ev-meta').textContent = `${fmtNum(evKwh, 1)} kWh · Media ${fmtNum(avgEvPrice, 3)} €/kWh`;
+      }
 
       document.getElementById('bar-gas').style.width = grandTotal > 0 ? gasPct + '%' : '50%';
       document.getElementById('bar-ev').style.width = grandTotal > 0 ? evPct + '%' : '50%';
+
+      // Actualizar tarjeta Bono Waylet
+      const targetYm = selectedMonth || new Date().toISOString().slice(0, 7);
+      const bonoStats = getWayletMonthStats(targetYm);
+      const bonoPct = w.includedKwh > 0 ? Math.min(100, Math.round((bonoStats.usedKwh / w.includedKwh) * 100)) : 0;
+
+      document.getElementById('bono-plan-badge').textContent = w.active
+        ? `${w.includedKwh} kWh · ${fmtEur(w.fee)}/mes`
+        : 'Plan desactivado';
+      const fillEl = document.getElementById('bono-fill');
+      fillEl.style.width = bonoPct + '%';
+      fillEl.classList.toggle('exceeded', bonoStats.usedKwh > w.includedKwh);
+
+      document.getElementById('bono-used-lbl').innerHTML = `Consumidos (${targetYm}): <strong>${fmtNum(bonoStats.usedKwh, 1)} kWh</strong>`;
+      document.getElementById('bono-rem-lbl').innerHTML = bonoStats.exceededKwh > 0
+        ? `<span style="color:#FBBF24;">Exceso: <strong>+${fmtNum(bonoStats.exceededKwh, 1)} kWh</strong></span>`
+        : `Quedan: <strong>${fmtNum(bonoStats.remainingKwh, 1)} kWh</strong>`;
 
       // Kilómetros del periodo
       let periodKm = 0;
@@ -1353,21 +1622,18 @@
       document.getElementById('kpi-cost-100').textContent = fmtEur(costPer100);
       document.getElementById('kpi-charges-count').textContent = filtered.length;
 
-      // Consumo real en L/100 km entre depósitos llenos
       const realL100 = calcRealFuelConsumption(sorted);
       document.getElementById('kpi-real-l100').textContent = realL100 !== null ? `${fmtNum(realL100, 2)} L/100` : '-- L/100';
 
-      // Ahorro estimado frente a gasolina puro (6,8 L/100 km)
-      const refGasPrice = avgGasPrice > 0 ? avgGasPrice : 1.55;
+      const refGasPrice = avgGasPrice > 0 ? avgGasPrice : 1.52;
       const equivalentThermalCost = (periodKm / 100) * 6.8 * refGasPrice;
       const savings = Math.max(0, equivalentThermalCost - grandTotal);
       document.getElementById('kpi-savings').textContent = fmtEur(savings);
 
-      // Actualizar precios por defecto en calculadora de viajes
       syncTripCalculatorDefaults(sorted);
       renderMonthlyChart(sorted);
       renderLists(sorted);
-      renderMaintenance(currentOdo);
+      renderLeasing(currentOdo);
     }
 
     function calcRealFuelConsumption(sorted) {
@@ -1378,7 +1644,6 @@
       const kmDiff = last.odo - first.odo;
       if (kmDiff <= 0) return null;
 
-      // Sumar todos los litros repostados después del primer depósito lleno hasta el último incluido
       let litersSum = 0;
       sorted.forEach(e => {
         if (e.type === 'gas' && e.odo > first.odo && e.odo <= last.odo) {
@@ -1392,18 +1657,28 @@
       const container = document.getElementById('monthly-chart');
       const months = [];
       const now = new Date();
+      const w = appState.waylet;
+
       for (let i = 5; i >= 0; i--) {
         const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
         const ym = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
         const label = d.toLocaleDateString('es-ES', { month: 'short' }).replace('.', '');
-        months.push({ ym, label, gas: 0, ev: 0 });
+        months.push({ ym, label, gas: 0, ev: 0, hasActivity: false });
       }
 
       sorted.forEach(e => {
         const m = months.find(item => e.date.startsWith(item.ym));
         if (m) {
+          m.hasActivity = true;
           if (e.type === 'gas') m.gas += Number(e.total) || 0;
           else m.ev += Number(e.total) || 0;
+        }
+      });
+
+      const currentYm = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+      months.forEach(m => {
+        if (w.active && (m.hasActivity || m.ym === currentYm)) {
+          m.ev += Number(w.fee) || 0;
         }
       });
 
@@ -1458,11 +1733,12 @@
       const title = isGas ? (e.place || 'Repostaje Gasolina') : (e.place || 'Recarga Eléctrica');
       const unitDetail = isGas
         ? `${fmtNum(e.qty, 2)} L · ${fmtNum(e.unitPrice || (e.total / e.qty), 3)} €/L`
-        : `${fmtNum(e.qty, 1)} kWh · ${fmtNum(e.unitPrice || (e.total / e.qty), 3)} €/kWh`;
+        : `${fmtNum(e.qty, 1)} kWh · ${Number(e.total) === 0 ? 'Incluido en Bono' : fmtNum(e.unitPrice || (e.total / e.qty), 3) + ' €/kWh'}`;
 
       let badges = '';
       if (e.mode) badges += `<span class="mini-badge">${e.mode}</span>`;
       if (isGas && e.fullTank) badges += `<span class="mini-badge full">Depósito lleno</span>`;
+      if (!isGas && e.useBono !== false) badges += `<span class="mini-badge bono">Bono Waylet</span>`;
       if (!isGas && (e.batStart !== undefined && e.batStart !== '' && e.batEnd !== undefined && e.batEnd !== '')) {
         badges += `<span class="mini-badge full">🔋 ${e.batStart}% → ${e.batEnd}%</span>`;
       }
@@ -1479,7 +1755,7 @@
             </div>
           </div>
           <div class="tx-right">
-            <div class="tx-price">${fmtEur(Number(e.total))}</div>
+            <div class="tx-price">${Number(e.total) === 0 && !isGas ? '0,00 € (Bono)' : fmtEur(Number(e.total))}</div>
             <div class="tx-actions">
               <button class="tx-btn" onclick="editEntry('${e.id}')">Editar</button>
               <button class="tx-btn del" onclick="deleteEntry('${e.id}')">Borrar</button>
@@ -1489,26 +1765,98 @@
       `;
     }
 
-    // CALCULADORA DE VIAJES
+    // RENDER CONTROL DE LEASING (25.000 KM/AÑO)
+    function renderLeasing(currentOdo) {
+      const l = appState.leasing;
+      const limit = Number(l.annualLimit) || 25000;
+      const startOdo = Number(l.startOdo) || 0;
+      const driven = Math.max(0, currentOdo - startOdo);
+      const remaining = Math.max(0, limit - driven);
+      const excess = Math.max(0, driven - limit);
+      const pct = Math.min(100, Math.round((driven / limit) * 100));
+      const fillClass = pct >= 95 ? 'danger' : (pct >= 80 ? 'warn' : '');
+
+      // Actualizar resumen de página principal
+      document.getElementById('home-leasing-rem').textContent = excess > 0
+        ? `Exceso: +${excess.toLocaleString('es-ES')} km`
+        : `Quedan ${remaining.toLocaleString('es-ES')} km`;
+      document.getElementById('home-leasing-rem').style.color = excess > 0 ? 'var(--danger)' : 'var(--bbva-cyan-dark)';
+      const homeFill = document.getElementById('home-leasing-fill');
+      homeFill.style.width = pct + '%';
+      homeFill.className = 'progress-fill ' + fillClass;
+      document.getElementById('home-leasing-used').textContent = `Consumidos: ${driven.toLocaleString('es-ES')} / ${limit.toLocaleString('es-ES')} km (${pct}%)`;
+
+      // Cálculos de días transcurridos y ritmo proyectado a 365 días
+      const startDate = l.startDate ? new Date(l.startDate + 'T00:00:00') : new Date();
+      const today = new Date();
+      const msPerDay = 1000 * 60 * 60 * 24;
+      const elapsedDays = Math.max(1, Math.floor((today - startDate) / msPerDay));
+      const remainingDays = Math.max(0, 365 - elapsedDays);
+
+      const dailyAvg = driven / elapsedDays;
+      const projectedAnnual = Math.round(dailyAvg * 365);
+      const allowedDailyRemaining = remainingDays > 0 ? (remaining / remainingDays) : 0;
+      const allowedMonthlyRemaining = allowedDailyRemaining * 30.4;
+
+      let paceClass = '';
+      let paceMsg = '';
+      if (excess > 0) {
+        const penalty = excess * (Number(l.extraKmCost) || 0);
+        paceClass = 'danger';
+        paceMsg = `🚨 Has superado el límite anual en <strong>${excess.toLocaleString('es-ES')} km</strong>` +
+          (penalty > 0 ? ` (penalización estimada: <strong>${fmtEur(penalty)}</strong>).` : '.');
+      } else if (projectedAnnual > limit) {
+        paceClass = 'warn';
+        paceMsg = `⚠️ A tu ritmo actual (${fmtNum(dailyAvg, 1)} km/día), terminarías el año en <strong>${projectedAnnual.toLocaleString('es-ES')} km</strong>. Para no pasarte, limita la media a <strong>${fmtNum(allowedDailyRemaining, 1)} km/día</strong> (${Math.round(allowedMonthlyRemaining).toLocaleString('es-ES')} km/mes).`;
+      } else {
+        paceMsg = `✅ Vas dentro del cupo: a este ritmo cerrarás el año en unos <strong>${projectedAnnual.toLocaleString('es-ES')} km</strong>. Dispones de <strong>${fmtNum(allowedDailyRemaining, 1)} km/día</strong> (${Math.round(allowedMonthlyRemaining).toLocaleString('es-ES')} km/mes) durante los próximos ${remainingDays} días.`;
+      }
+
+      document.getElementById('leasing-container').innerHTML = `
+        <div class="leasing-hero-numbers">
+          <div class="leasing-stat-box">
+            <div class="lbl">Km Consumidos</div>
+            <div class="val">${driven.toLocaleString('es-ES')} km</div>
+          </div>
+          <div class="leasing-stat-box accent">
+            <div class="lbl">Km Disponibles</div>
+            <div class="val">${remaining.toLocaleString('es-ES')} km</div>
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; font-size:12.5px; font-weight:700; margin-bottom:6px;">
+          <span>Cupo anual: ${limit.toLocaleString('es-ES')} km</span>
+          <span>${pct}% utilizado</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill ${fillClass}" style="width: ${pct}%"></div>
+        </div>
+        <div style="display:flex; justify-content:space-between; font-size:11.5px; color:var(--text-muted); margin-top:6px;">
+          <span>Inicio: ${l.startDate || 'Hoy'} (${elapsedDays} días)</span>
+          <span>Quedan ${remainingDays} días de contrato</span>
+        </div>
+
+        <div class="pace-banner ${paceClass}">${paceMsg}</div>
+      `;
+    }
+
+    // CALCULADORA DE VIAJES (BATERÍA 20 KWH)
     function syncTripCalculatorDefaults(sorted) {
       const gasEntries = sorted.filter(e => e.type === 'gas' && e.qty > 0);
-      const evEntries = sorted.filter(e => e.type === 'ev' && e.qty > 0);
-
       const gasInput = document.getElementById('trip-gas-price');
       const evInput = document.getElementById('trip-ev-price');
 
       if (!gasInput.dataset.touched) {
         const avgG = gasEntries.length
           ? gasEntries.reduce((s, e) => s + Number(e.total), 0) / gasEntries.reduce((s, e) => s + Number(e.qty), 0)
-          : 1.549;
+          : 1.519;
         gasInput.value = avgG.toFixed(3);
       }
 
       if (!evInput.dataset.touched) {
-        const avgE = evEntries.length
-          ? evEntries.reduce((s, e) => s + Number(e.total), 0) / evEntries.reduce((s, e) => s + Number(e.qty), 0)
-          : 0.160;
-        evInput.value = avgE.toFixed(3);
+        const w = appState.waylet;
+        const effectiveRate = w.active && w.includedKwh > 0 ? (w.fee / w.includedKwh) : w.extraRate;
+        evInput.value = effectiveRate.toFixed(3);
       }
       calculateTrip();
     }
@@ -1518,18 +1866,17 @@
       const mult = parseInt(document.getElementById('trip-round').value) || 1;
       const totalKm = baseKm * mult;
 
-      const gasPrice = parseFloat(document.getElementById('trip-gas-price').value) || 1.55;
-      const evPrice = parseFloat(document.getElementById('trip-ev-price').value) || 0.16;
-      const evRange = parseFloat(document.getElementById('trip-ev-range').value) || 55;
+      const gasPrice = parseFloat(document.getElementById('trip-gas-price').value) || 1.52;
+      const evPrice = parseFloat(document.getElementById('trip-ev-price').value) || 0.336;
+      const evRange = parseFloat(document.getElementById('trip-ev-range').value) || 100;
       const hybridL100 = parseFloat(document.getElementById('trip-hybrid-l100').value) || 5.6;
+      const batCap = Number(appState.waylet.batteryKwh) || 20;
 
-      // 1. Solo Híbrido
       const litersOnlyHybrid = (totalKm / 100) * hybridL100;
       const costOnlyHybrid = litersOnlyHybrid * gasPrice;
 
-      // 2. Saliendo al 100% EV (capacidad útil Cupra e-HYBRID ~11.5 kWh)
       const evKmUsed = Math.min(totalKm, evRange);
-      const kwhUsed = (evKmUsed / evRange) * 11.5;
+      const kwhUsed = (evKmUsed / evRange) * batCap;
       const remainingHybridKm = Math.max(0, totalKm - evKmUsed);
       const litersMixed = (remainingHybridKm / 100) * hybridL100;
       const costWithEv = (kwhUsed * evPrice) + (litersMixed * gasPrice);
@@ -1543,37 +1890,6 @@
       const diff = Math.max(0, costOnlyHybrid - costWithEv);
       document.getElementById('trip-saving-text').textContent =
         `Ahorras ${fmtEur(diff)} en este viaje saliendo con batería cargada`;
-    }
-
-    function renderMaintenance(currentOdo) {
-      const m = appState.maint;
-      const items = [
-        { name: 'Revisión Oficial / Cambio Aceite', last: m.oilLast, interval: m.oilInterval },
-        { name: 'Rotación / Cambio Neumáticos', last: m.tiresLast, interval: m.tiresInterval }
-      ];
-
-      document.getElementById('maint-container').innerHTML = items.map(item => {
-        const driven = Math.max(0, currentOdo - item.last);
-        const remaining = Math.max(0, item.interval - driven);
-        const pct = Math.min(100, Math.round((driven / item.interval) * 100));
-        const fillClass = pct >= 90 ? 'danger' : (pct >= 75 ? 'warn' : '');
-
-        return `
-          <div class="maint-item">
-            <div class="maint-head">
-              <span>${item.name}</span>
-              <span>${pct}%</span>
-            </div>
-            <div class="progress-track">
-              <div class="progress-fill ${fillClass}" style="width: ${pct}%"></div>
-            </div>
-            <div class="maint-sub">
-              <span>Recorridos: ${driven.toLocaleString('es-ES')} km</span>
-              <span>Quedan: <strong>${remaining.toLocaleString('es-ES')} km</strong></span>
-            </div>
-          </div>
-        `;
-      }).join('');
     }
 
     function switchTab(tab) {
@@ -1602,9 +1918,13 @@
         : (isGas ? '⛽ Nuevo Repostaje Gasolina' : '⚡ Nueva Recarga Eléctrica');
 
       document.getElementById('label-qty').textContent = isGas ? 'Litros (L)' : 'Energía (kWh)';
-      document.getElementById('label-unit-price').textContent = isGas ? 'Precio (€/L)' : 'Tarifa (€/kWh)';
+      document.getElementById('label-unit-price').textContent = isGas ? 'Precio (€/L)' : 'Tarifa extra (€/kWh)';
+      document.getElementById('label-total').textContent = isGas ? 'Importe Total (€)' : 'Coste Extra fuera de bono (€)';
+
       document.getElementById('gas-extra-fields').style.display = isGas ? 'block' : 'none';
+      document.getElementById('ev-top-fields').style.display = isGas ? 'none' : 'block';
       document.getElementById('ev-extra-fields').style.display = isGas ? 'none' : 'block';
+      document.getElementById('ev-bono-preview').style.display = isGas ? 'none' : 'block';
 
       if (existing) {
         document.getElementById('entry-date').value = existing.date;
@@ -1620,12 +1940,24 @@
           document.getElementById('entry-charger').value = existing.place || '';
           document.getElementById('entry-bat-start').value = existing.batStart ?? '';
           document.getElementById('entry-bat-end').value = existing.batEnd ?? '';
+          document.getElementById('entry-use-bono').checked = existing.useBono !== false;
+          recalcEvBonoPreview();
         }
       } else {
         document.getElementById('entry-date').value = new Date().toISOString().split('T')[0];
         document.getElementById('entry-mode').value = isGas ? 'Híbrido / Autopista' : 'Eléctrico / Ciudad';
         const odo = getCurrentOdometer();
         if (odo > 0) document.getElementById('entry-odo').value = odo;
+
+        if (isGas) {
+          document.getElementById('entry-station').value = 'EsclatOil';
+        } else {
+          document.getElementById('entry-charger').value = 'Repsol (Waylet)';
+          document.getElementById('entry-use-bono').checked = appState.waylet.active;
+          document.getElementById('entry-unit-price').value = appState.waylet.extraRate;
+          document.getElementById('entry-total').value = '0.00';
+          recalcEvBonoPreview();
+        }
       }
 
       document.getElementById('entry-modal').classList.add('open');
@@ -1633,6 +1965,60 @@
 
     function closeModal(id) {
       document.getElementById(id).classList.remove('open');
+    }
+
+    function calcKwhFromBattery() {
+      const s = parseFloat(document.getElementById('entry-bat-start').value);
+      const e = parseFloat(document.getElementById('entry-bat-end').value);
+      const cap = Number(appState.waylet.batteryKwh) || 20;
+      if (!isNaN(s) && !isNaN(e) && e > s) {
+        const kwh = ((e - s) / 100) * cap;
+        document.getElementById('entry-qty').value = kwh.toFixed(2);
+        handleQtyInput();
+      }
+    }
+
+    function handleQtyInput() {
+      const type = document.getElementById('entry-type').value;
+      if (type === 'ev') {
+        recalcEvBonoPreview();
+      } else {
+        calcTotalFromUnit();
+      }
+    }
+
+    function recalcEvBonoPreview() {
+      const type = document.getElementById('entry-type').value;
+      if (type !== 'ev') return;
+
+      const useBono = document.getElementById('entry-use-bono').checked && appState.waylet.active;
+      const qty = parseFloat(document.getElementById('entry-qty').value) || 0;
+      const rate = parseFloat(document.getElementById('entry-unit-price').value) || appState.waylet.extraRate;
+      const dateVal = document.getElementById('entry-date').value || new Date().toISOString().slice(0, 10);
+      const ym = dateVal.slice(0, 7);
+      const excludeId = document.getElementById('entry-id').value || null;
+
+      const box = document.getElementById('ev-bono-preview-text');
+
+      if (!useBono) {
+        document.getElementById('entry-total').value = (qty * rate).toFixed(2);
+        box.innerHTML = `Recarga fuera del bono Waylet: se cobrarán <strong>${fmtNum(qty, 2)} kWh × ${fmtNum(rate, 3)} € = ${fmtEur(qty * rate)}</strong>.`;
+        return;
+      }
+
+      const stats = getWayletMonthStats(ym, excludeId);
+      const rem = stats.remainingKwh;
+
+      if (qty <= rem) {
+        document.getElementById('entry-total').value = '0.00';
+        box.innerHTML = `✅ <strong>Cubierto al 100% por tu Bono Waylet</strong> (${fmtNum(rem, 1)} kWh disponibles este mes). Coste extra: <strong>0,00 €</strong>.`;
+      } else {
+        const covered = rem;
+        const excess = qty - rem;
+        const extraCost = excess * rate;
+        document.getElementById('entry-total').value = extraCost.toFixed(2);
+        box.innerHTML = `⚠️ Bono agotado: <strong>${fmtNum(covered, 1)} kWh</strong> entran en bono y <strong>${fmtNum(excess, 1)} kWh</strong> van a ${fmtNum(rate, 2)} €/kWh → Extra: <strong>${fmtEur(extraCost)}</strong>.`;
+      }
     }
 
     function calcTotalFromUnit() {
@@ -1652,7 +2038,19 @@
     }
 
     function setStation(name) { document.getElementById('entry-station').value = name; }
-    function setCharger(name) { document.getElementById('entry-charger').value = name; }
+
+    function selectRepsolCharger() {
+      document.getElementById('entry-charger').value = 'Repsol (Waylet)';
+      document.getElementById('entry-use-bono').checked = appState.waylet.active;
+      document.getElementById('entry-unit-price').value = appState.waylet.extraRate;
+      recalcEvBonoPreview();
+    }
+
+    function selectOtherCharger(name) {
+      document.getElementById('entry-charger').value = name;
+      document.getElementById('entry-use-bono').checked = false;
+      recalcEvBonoPreview();
+    }
 
     function saveEntry(e) {
       e.preventDefault();
@@ -1673,6 +2071,7 @@
           ? document.getElementById('entry-station').value.trim()
           : document.getElementById('entry-charger').value.trim(),
         fullTank: isGas ? document.getElementById('entry-full-tank').checked : false,
+        useBono: !isGas ? document.getElementById('entry-use-bono').checked : false,
         batStart: !isGas ? document.getElementById('entry-bat-start').value : '',
         batEnd: !isGas ? document.getElementById('entry-bat-end').value : ''
       };
@@ -1697,6 +2096,30 @@
       }
     }
 
+    // CONFIGURACIÓN WAYLET
+    function openWayletModal() {
+      const w = appState.waylet;
+      document.getElementById('waylet-active').checked = w.active;
+      document.getElementById('waylet-fee').value = w.fee;
+      document.getElementById('waylet-kwh').value = w.includedKwh;
+      document.getElementById('waylet-extra-rate').value = w.extraRate;
+      document.getElementById('car-battery-kwh').value = w.batteryKwh;
+      document.getElementById('waylet-modal').classList.add('open');
+    }
+
+    function saveWayletConfig(e) {
+      e.preventDefault();
+      appState.waylet = {
+        active: document.getElementById('waylet-active').checked,
+        fee: parseFloat(document.getElementById('waylet-fee').value) || 0,
+        includedKwh: parseFloat(document.getElementById('waylet-kwh').value) || 150,
+        extraRate: parseFloat(document.getElementById('waylet-extra-rate').value) || 0.38,
+        batteryKwh: parseFloat(document.getElementById('car-battery-kwh').value) || 20
+      };
+      closeModal('waylet-modal');
+      saveState();
+    }
+
     function openOdoModal() {
       document.getElementById('manual-odo-input').value = getCurrentOdometer();
       document.getElementById('odo-modal').classList.add('open');
@@ -1709,30 +2132,32 @@
       saveState();
     }
 
-    function openMaintModal() {
-      document.getElementById('maint-oil-last').value = appState.maint.oilLast;
-      document.getElementById('maint-oil-int').value = appState.maint.oilInterval;
-      document.getElementById('maint-tires-last').value = appState.maint.tiresLast;
-      document.getElementById('maint-tires-int').value = appState.maint.tiresInterval;
-      document.getElementById('maint-modal').classList.add('open');
+    // CONFIGURACIÓN LEASING
+    function openLeasingModal() {
+      const l = appState.leasing;
+      document.getElementById('leasing-limit').value = l.annualLimit;
+      document.getElementById('leasing-start-odo').value = l.startOdo;
+      document.getElementById('leasing-start-date').value = l.startDate;
+      document.getElementById('leasing-extra-cost').value = l.extraKmCost;
+      document.getElementById('leasing-modal').classList.add('open');
     }
 
-    function saveMaintConfig(e) {
+    function saveLeasingConfig(e) {
       e.preventDefault();
-      appState.maint = {
-        oilLast: Number(document.getElementById('maint-oil-last').value),
-        oilInterval: Number(document.getElementById('maint-oil-int').value),
-        tiresLast: Number(document.getElementById('maint-tires-last').value),
-        tiresInterval: Number(document.getElementById('maint-tires-int').value)
+      appState.leasing = {
+        annualLimit: Number(document.getElementById('leasing-limit').value) || 25000,
+        startOdo: Number(document.getElementById('leasing-start-odo').value) || 0,
+        startDate: document.getElementById('leasing-start-date').value,
+        extraKmCost: parseFloat(document.getElementById('leasing-extra-cost').value) || 0
       };
-      closeModal('maint-modal');
+      closeModal('leasing-modal');
       saveState();
     }
 
     // EXPORTACIÓN CSV Y JSON
     function exportCSV() {
       if (appState.entries.length === 0) return alert('No hay registros para exportar.');
-      const headers = ['Fecha', 'Tipo', 'Odometro_km', 'Cantidad', 'Precio_Unitario', 'Total_EUR', 'Modo', 'Deposito_Lleno', 'Bat_Inicio', 'Bat_Fin', 'Lugar'];
+      const headers = ['Fecha', 'Tipo', 'Odometro_km', 'Cantidad', 'Precio_Unitario', 'Total_Extra_EUR', 'Bono_Waylet', 'Modo', 'Deposito_Lleno', 'Bat_Inicio', 'Bat_Fin', 'Lugar'];
       const rows = appState.entries.map(e => [
         e.date,
         e.type === 'gas' ? 'Gasolina' : 'Recarga Electrica',
@@ -1740,6 +2165,7 @@
         String(e.qty).replace('.', ','),
         String(e.unitPrice).replace('.', ','),
         String(e.total).replace('.', ','),
+        e.useBono ? 'Si' : 'No',
         `"${e.mode || ''}"`,
         e.fullTank ? 'Si' : 'No',
         e.batStart || '',
@@ -1776,7 +2202,7 @@
         try {
           const parsed = JSON.parse(e.target.result);
           if (parsed && Array.isArray(parsed.entries)) {
-            appState = parsed;
+            appState = { ...appState, ...parsed };
             saveState();
             alert('Copia de seguridad restaurada correctamente.');
           } else {
@@ -1792,18 +2218,20 @@
     function loadDemoData() {
       const now = new Date();
       const ym = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-      const prev = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-      const ymPrev = `${prev.getFullYear()}-${String(prev.getMonth() + 1).padStart(2, '0')}`;
+      const startDate = new Date(now.getFullYear(), now.getMonth() - 2, 1).toISOString().split('T')[0];
 
+      appState.leasing = {
+        annualLimit: 25000,
+        startOdo: 0,
+        startDate,
+        extraKmCost: 0.08
+      };
       appState.entries = [
-        { id: '1', type: 'gas', date: `${ymPrev}-10`, odo: 13600, qty: 34.0, unitPrice: 1.539, total: 52.33, mode: 'Híbrido / Autopista', fullTank: true, place: 'Repsol (Waylet)' },
-        { id: '2', type: 'ev', date: `${ymPrev}-18`, odo: 13950, qty: 11.2, unitPrice: 0.14, total: 1.57, mode: 'Eléctrico / Ciudad', batStart: 12, batEnd: 100, place: 'Casa (Tarifa Valle)' },
-        { id: '3', type: 'ev', date: `${ym}-02`, odo: 14200, qty: 11.5, unitPrice: 0.14, total: 1.61, mode: 'Eléctrico / Ciudad', batStart: 10, batEnd: 100, place: 'Casa (Tarifa Valle)' },
-        { id: '4', type: 'gas', date: `${ym}-05`, odo: 14580, qty: 32.4, unitPrice: 1.549, total: 50.19, mode: 'Híbrido / Autopista', fullTank: true, place: 'Repsol (Waylet)' },
-        { id: '5', type: 'ev', date: `${ym}-09`, odo: 14920, qty: 12.0, unitPrice: 0.35, total: 4.20, mode: 'Mixto', batStart: 5, batEnd: 100, place: 'Waylet / Repsol' },
-        { id: '6', type: 'ev', date: `${ym}-13`, odo: 15310, qty: 11.8, unitPrice: 0.14, total: 1.65, mode: 'Eléctrico / Ciudad', batStart: 14, batEnd: 100, place: 'Casa (Tarifa Valle)' }
+        { id: '1', type: 'gas', date: `${ym}-01`, odo: 4100, qty: 35.0, unitPrice: 1.489, total: 52.12, mode: 'Híbrido / Autopista', fullTank: true, place: 'EsclatOil' },
+        { id: '2', type: 'ev', date: `${ym}-04`, odo: 4320, qty: 17.0, unitPrice: 0.38, total: 0.00, useBono: true, mode: 'Eléctrico / Ciudad', batStart: 15, batEnd: 100, place: 'Repsol (Waylet)' },
+        { id: '3', type: 'ev', date: `${ym}-08`, odo: 4540, qty: 18.0, unitPrice: 0.38, total: 0.00, useBono: true, mode: 'Eléctrico / Ciudad', batStart: 10, batEnd: 100, place: 'Repsol (Waylet)' },
+        { id: '4', type: 'gas', date: `${ym}-12`, odo: 4890, qty: 24.5, unitPrice: 1.479, total: 36.24, mode: 'Mixto', fullTank: true, place: 'EsclatOil' }
       ];
-      appState.maint = { oilLast: 0, oilInterval: 15000, tiresLast: 0, tiresInterval: 40000 };
       saveState();
     }
 
