@@ -48,8 +48,9 @@
     body {
       background-color: var(--bg-app);
       color: var(--text-main);
-      padding-bottom: 94px;
+      padding-bottom: 92px;
       min-height: 100vh;
+      overflow-x: hidden;
     }
 
     /* HEADER OSCURO BBVA-CYAN */
@@ -74,6 +75,7 @@
     .brand-title {
       display: flex;
       flex-direction: column;
+      min-width: 0;
     }
 
     .brand-title span.tag {
@@ -85,28 +87,58 @@
     }
 
     .brand-title h1 {
-      font-size: 18px;
+      font-size: 17.5px;
       font-weight: 700;
       letter-spacing: -0.3px;
       color: #FFFFFF;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
     }
 
     .odo-pill {
       background: rgba(45, 204, 205, 0.12);
       border: 1px solid rgba(45, 204, 205, 0.4);
-      padding: 6px 11px;
+      padding: 6px 10px;
       border-radius: 999px;
       font-size: 12px;
       font-weight: 600;
       color: #E2E8F0;
       display: flex;
       align-items: center;
-      gap: 5px;
+      gap: 4px;
       cursor: pointer;
       white-space: nowrap;
     }
 
     .odo-pill strong { color: var(--bbva-cyan); }
+
+    .data-header-btn {
+      background: rgba(45, 204, 205, 0.12);
+      border: 1px solid rgba(45, 204, 205, 0.4);
+      color: var(--bbva-cyan);
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background 0.15s ease, color 0.15s ease;
+    }
+
+    .data-header-btn.active {
+      background: var(--bbva-cyan);
+      color: #050E1C;
+    }
 
     /* SELECTOR DE PERIODO Y MES COMPLETO */
     .period-bar {
@@ -311,70 +343,54 @@
       border-radius: 999px;
       overflow: hidden;
       display: flex;
-      margin-bottom: 14px;
     }
 
     .ratio-gas { background: var(--fuel-amber); transition: width 0.3s ease; }
     .ratio-ev { background: var(--bbva-cyan); transition: width 0.3s ease; }
 
-    /* KPIS DE EFICIENCIA */
+    /* KPIS DE EFICIENCIA (EN PESTAÑA ANÁLISIS) */
     .kpi-strip {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 8px;
-      background: var(--card-inset);
-      padding: 10px;
-      border-radius: var(--radius-md);
-      border: 1px solid var(--border-subtle);
+      gap: 10px;
     }
 
     .kpi-item {
-      background: var(--card-bg);
-      padding: 9px 10px;
-      border-radius: 8px;
+      background: var(--card-inset);
+      padding: 14px 10px;
+      border-radius: 12px;
       border: 1px solid var(--border-subtle);
       text-align: center;
     }
 
     .kpi-item .kpi-v {
-      font-size: 15px;
+      font-size: 17px;
       font-weight: 800;
       color: #FFFFFF;
     }
 
     .kpi-item .kpi-l {
-      font-size: 11px;
+      font-size: 11.5px;
       color: var(--text-muted);
-      margin-top: 2px;
+      margin-top: 3px;
     }
 
-    /* TARJETA BONO WAYLET & TARJETA LEASING */
+    /* TARJETA BONO WAYLET */
     .bono-card {
       background: linear-gradient(135deg, #072146 0%, #0C3266 100%);
       color: #FFFFFF;
       border-radius: var(--radius-lg);
-      padding: 15px 16px;
-      margin-top: 12px;
+      padding: 16px;
+      margin-top: 14px;
       border: 1px solid rgba(45, 204, 205, 0.32);
       box-shadow: var(--shadow-sm);
-    }
-
-    .leasing-home-card {
-      background: var(--card-bg);
-      border: 1px solid var(--border-light);
-      border-left: 4px solid var(--bbva-cyan);
-      border-radius: var(--radius-lg);
-      padding: 14px 16px;
-      margin-top: 12px;
-      box-shadow: var(--shadow-sm);
-      cursor: pointer;
     }
 
     .bono-top {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 8px;
+      margin-bottom: 10px;
       gap: 8px;
     }
 
@@ -438,13 +454,13 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 10px;
-      margin: 14px 0;
+      margin: 16px 0 8px;
     }
 
     .btn-action {
       border: none;
       border-radius: var(--radius-md);
-      padding: 14px 12px;
+      padding: 15px 12px;
       font-size: 14.5px;
       font-weight: 700;
       cursor: pointer;
@@ -470,6 +486,14 @@
       color: var(--bbva-cyan);
       border: 1px solid rgba(45, 204, 205, 0.45);
       border-bottom: 3px solid var(--bbva-cyan);
+    }
+
+    .swipe-hint {
+      text-align: center;
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 10px;
+      opacity: 0.75;
     }
 
     /* SECCIONES Y TARJETAS */
@@ -515,7 +539,7 @@
       grid-template-columns: repeat(6, 1fr);
       gap: 8px;
       align-items: end;
-      height: 130px;
+      height: 145px;
       padding-top: 18px;
       border-bottom: 1px solid var(--border-subtle);
     }
@@ -562,6 +586,7 @@
       gap: 8px;
       margin-bottom: 12px;
       overflow-x: auto;
+      padding-bottom: 2px;
     }
 
     .pill {
@@ -821,7 +846,7 @@
       color: #FCA5A5;
     }
 
-    /* NAVEGACIÓN INFERIOR MÁS GRANDE Y LEGIBLE */
+    /* NAVEGACIÓN INFERIOR 5 PESTAÑAS */
     .bottom-nav {
       position: fixed;
       bottom: 0;
@@ -857,7 +882,7 @@
     }
 
     .nav-btn .nav-txt {
-      font-size: 12.5px;
+      font-size: 12px;
       font-weight: 700;
       letter-spacing: -0.2px;
     }
@@ -874,9 +899,24 @@
       margin-top: 1px;
     }
 
-    /* VISTAS */
+    /* VISTAS Y ANIMACIÓN DE DESLIZAMIENTO */
     .view-section { display: none; }
-    .view-section.active { display: block; }
+    .view-section.active { display: block; animation: fadeIn 0.18s ease-out; }
+    .view-section.slide-left { animation: slideFromRight 0.22s ease-out; }
+    .view-section.slide-right { animation: slideFromLeft 0.22s ease-out; }
+
+    @keyframes fadeIn {
+      from { opacity: 0.6; }
+      to { opacity: 1; }
+    }
+    @keyframes slideFromRight {
+      from { opacity: 0.45; transform: translateX(22px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes slideFromLeft {
+      from { opacity: 0.45; transform: translateX(-22px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
 
     /* MODALES OSCUROS */
     .modal-backdrop {
@@ -1060,12 +1100,17 @@
     <div class="container">
       <div class="header-top">
         <div class="brand-title">
-          <span class="tag">Cupra León e-HYBRID · Leasing</span>
+          <span class="tag">Cupra León e-HYBRID</span>
           <h1>Control de Energía y Km</h1>
         </div>
-        <div class="odo-pill" onclick="openOdoModal()" title="Actualizar odómetro">
-          <span>Odómetro:</span>
-          <strong id="header-odo">0 km</strong>
+        <div class="header-actions">
+          <div class="odo-pill" onclick="openOdoModal()" title="Actualizar odómetro">
+            <span>Odómetro:</span>
+            <strong id="header-odo">0 km</strong>
+          </div>
+          <button type="button" class="data-header-btn" id="btn-header-data" onclick="switchTab('data')" title="Datos y copias de seguridad" aria-label="Datos y copias de seguridad">
+            💾
+          </button>
         </div>
       </div>
 
@@ -1086,7 +1131,7 @@
 
   <main class="container">
 
-    <!-- VISTA 1: INICIO (DASHBOARD PRINCIPAL) -->
+    <!-- VISTA 1: INICIO (CABINA RÁPIDA Y LIMPIA) -->
     <section id="view-home" class="view-section active">
       <div class="hero-card">
         <div class="total-row">
@@ -1126,41 +1171,6 @@
           <div class="ratio-gas" id="bar-gas" style="width: 50%"></div>
           <div class="ratio-ev" id="bar-ev" style="width: 50%"></div>
         </div>
-
-        <!-- INDICADORES DE EFICIENCIA Y CONSUMO REAL -->
-        <div class="kpi-strip">
-          <div class="kpi-item">
-            <div class="kpi-v" id="kpi-cost-100">0,00 €</div>
-            <div class="kpi-l">Coste real / 100 km</div>
-          </div>
-          <div class="kpi-item">
-            <div class="kpi-v" id="kpi-real-l100">-- L/100</div>
-            <div class="kpi-l">Consumo Gasolina Real</div>
-          </div>
-          <div class="kpi-item">
-            <div class="kpi-v" id="kpi-charges-count">0</div>
-            <div class="kpi-l">Cargas / Repostajes</div>
-          </div>
-          <div class="kpi-item">
-            <div class="kpi-v" id="kpi-savings" style="color: var(--success);">0,00 €</div>
-            <div class="kpi-l">Ahorro vs Térmico</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- RESUMEN RÁPIDO LEASING 25.000 KM -->
-      <div class="leasing-home-card" onclick="switchTab('leasing')">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-          <span style="font-size:12.5px; font-weight:700; color:#FFFFFF;">📄 Cupo Anual Leasing (25.000 km)</span>
-          <span style="font-size:12px; font-weight:800; color:var(--bbva-cyan);" id="home-leasing-rem">Quedan 25.000 km</span>
-        </div>
-        <div class="progress-track" style="height:8px;">
-          <div class="progress-fill" id="home-leasing-fill" style="width:0%"></div>
-        </div>
-        <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--text-muted); margin-top:5px;">
-          <span id="home-leasing-used">Consumidos: 0 km (0%)</span>
-          <span style="color:var(--bbva-cyan);">Ver proyección →</span>
-        </div>
       </div>
 
       <!-- TARJETA SUSCRIPCIÓN WAYLET 150 kWh -->
@@ -1191,7 +1201,36 @@
         </button>
       </div>
 
-      <!-- GRÁFICA EVOLUCIÓN MENSUAL (6 MESES) -->
+      <div class="swipe-hint">← Desliza a izquierda o derecha para cambiar de pantalla →</div>
+    </section>
+
+    <!-- VISTA 2: ANÁLISIS Y ESTADÍSTICAS -->
+    <section id="view-analytics" class="view-section">
+      <div class="section-title">
+        <span>Eficiencia y Consumo</span>
+        <span id="analytics-period-badge" style="font-size:12px; color:var(--bbva-cyan); font-weight:700;"></span>
+      </div>
+      <div class="card">
+        <div class="kpi-strip">
+          <div class="kpi-item">
+            <div class="kpi-v" id="kpi-cost-100">0,00 €</div>
+            <div class="kpi-l">Coste real / 100 km</div>
+          </div>
+          <div class="kpi-item">
+            <div class="kpi-v" id="kpi-real-l100">-- L/100</div>
+            <div class="kpi-l">Consumo Gasolina Real</div>
+          </div>
+          <div class="kpi-item">
+            <div class="kpi-v" id="kpi-charges-count">0</div>
+            <div class="kpi-l">Cargas / Repostajes</div>
+          </div>
+          <div class="kpi-item">
+            <div class="kpi-v" id="kpi-savings" style="color: var(--success);">0,00 €</div>
+            <div class="kpi-l">Ahorro vs Térmico</div>
+          </div>
+        </div>
+      </div>
+
       <div class="section-title">
         <span>Evolución últimos 6 meses</span>
       </div>
@@ -1202,16 +1241,9 @@
         </div>
         <div id="monthly-chart" class="bar-chart-grid"></div>
       </div>
-
-      <!-- ÚLTIMOS MOVIMIENTOS -->
-      <div class="section-title">
-        <span>Últimos movimientos</span>
-        <button class="tx-btn" onclick="switchTab('history')">Ver todos →</button>
-      </div>
-      <div id="recent-list" class="tx-list"></div>
     </section>
 
-    <!-- VISTA 2: HISTORIAL COMPLETO -->
+    <!-- VISTA 3: HISTORIAL COMPLETO -->
     <section id="view-history" class="view-section">
       <div class="section-title">
         <span>Historial de Energía</span>
@@ -1225,7 +1257,7 @@
       <div id="full-history-list" class="tx-list"></div>
     </section>
 
-    <!-- VISTA 3: CALCULADORA DE VIAJES -->
+    <!-- VISTA 4: CALCULADORA DE VIAJES -->
     <section id="view-trips" class="view-section">
       <div class="section-title">
         <span>Calculadora de Viajes e-HYBRID</span>
@@ -1280,7 +1312,7 @@
       </div>
     </section>
 
-    <!-- VISTA 4: CONTROL DE LEASING ANUAL -->
+    <!-- VISTA 5: CONTROL DE LEASING ANUAL -->
     <section id="view-leasing" class="view-section">
       <div class="section-title">
         <span>Control de Kilómetros Leasing</span>
@@ -1289,10 +1321,11 @@
       <div class="card" id="leasing-container"></div>
     </section>
 
-    <!-- VISTA 5: DATOS Y BACKUP -->
+    <!-- VISTA 6 (CABECERA): DATOS Y BACKUP -->
     <section id="view-data" class="view-section">
       <div class="section-title">
         <span>Exportación y Copias de Seguridad</span>
+        <button class="tx-btn" onclick="switchTab('home', 'right')">← Volver</button>
       </div>
       <div class="card">
         <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 14px; line-height: 1.4;">
@@ -1323,11 +1356,16 @@
 
   </main>
 
-  <!-- NAVEGACIÓN INFERIOR AMPLIADA -->
+  <!-- NAVEGACIÓN INFERIOR (5 PESTAÑAS) -->
   <nav class="bottom-nav">
     <button class="nav-btn active" id="nav-home" onclick="switchTab('home')">
       <span class="nav-ico">🏠</span>
       <span class="nav-txt">Inicio</span>
+      <span class="nav-dot"></span>
+    </button>
+    <button class="nav-btn" id="nav-analytics" onclick="switchTab('analytics')">
+      <span class="nav-ico">📊</span>
+      <span class="nav-txt">Análisis</span>
       <span class="nav-dot"></span>
     </button>
     <button class="nav-btn" id="nav-history" onclick="switchTab('history')">
@@ -1343,11 +1381,6 @@
     <button class="nav-btn" id="nav-leasing" onclick="switchTab('leasing')">
       <span class="nav-ico">📄</span>
       <span class="nav-txt">Leasing</span>
-      <span class="nav-dot"></span>
-    </button>
-    <button class="nav-btn" id="nav-data" onclick="switchTab('data')">
-      <span class="nav-ico">💾</span>
-      <span class="nav-txt">Datos</span>
       <span class="nav-dot"></span>
     </button>
   </nav>
@@ -1538,7 +1571,11 @@
       navigator.serviceWorker.register('./sw.js').catch(console.error);
     }
 
-    // ESTADO DE LA APLICACIÓN (COMPATIBLE CON TODAS LAS VERSIONES)
+    // ORDEN DE PESTAÑAS PARA NAVEGACIÓN POR DESLIZAMIENTO LATERAL
+    const TAB_ORDER = ['home', 'analytics', 'history', 'trips', 'leasing'];
+    let currentTab = 'home';
+
+    // ESTADO DE LA APLICACIÓN (MISMA CLAVE PARA CONSERVAR TODOS TUS DATOS)
     const STORAGE_KEY = 'cupra_ehybrid_data_v1';
     let appState = {
       entries: [],
@@ -1644,7 +1681,8 @@
 
       const mode = document.getElementById('period-mode').value;
       const selectedMonth = document.getElementById('month-picker').value;
-      document.getElementById('month-label-btn').textContent = formatFullMonthLabel(selectedMonth);
+      const monthLabel = formatFullMonthLabel(selectedMonth);
+      document.getElementById('month-label-btn').textContent = monthLabel;
 
       const sorted = [...appState.entries].sort((a, b) => a.date.localeCompare(b.date) || a.odo - b.odo);
       const w = appState.waylet;
@@ -1654,10 +1692,12 @@
 
       if (mode === 'month' && selectedMonth) {
         filtered = sorted.filter(e => e.date.startsWith(selectedMonth));
-        document.getElementById('summary-period-label').textContent = 'Gasto · ' + formatFullMonthLabel(selectedMonth);
+        document.getElementById('summary-period-label').textContent = 'Gasto · ' + monthLabel;
+        document.getElementById('analytics-period-badge').textContent = monthLabel;
         if (w.active) subscriptionCostInPeriod = Number(w.fee) || 0;
       } else {
         document.getElementById('summary-period-label').textContent = 'Gasto Acumulado Total';
+        document.getElementById('analytics-period-badge').textContent = 'Acumulado Total';
         if (w.active) {
           const distinctMonths = new Set(sorted.map(e => e.date.slice(0, 7)));
           if (selectedMonth) distinctMonths.add(selectedMonth);
@@ -1731,6 +1771,7 @@
 
       document.getElementById('period-km').textContent = periodKm.toLocaleString('es-ES') + ' km';
 
+      // KPIs (en pestaña Análisis)
       const costPer100 = periodKm > 0 ? (grandTotal / periodKm) * 100 : 0;
       document.getElementById('kpi-cost-100').textContent = fmtEur(costPer100);
       document.getElementById('kpi-charges-count').textContent = filtered.length;
@@ -1799,8 +1840,8 @@
 
       container.innerHTML = months.map(m => {
         const tot = m.gas + m.ev;
-        const gasH = Math.round((m.gas / maxTotal) * 85);
-        const evH = Math.round((m.ev / maxTotal) * 85);
+        const gasH = Math.round((m.gas / maxTotal) * 95);
+        const evH = Math.round((m.ev / maxTotal) * 95);
         return `
           <div class="chart-col">
             <div class="chart-val-top">${tot > 0 ? Math.round(tot) + '€' : ''}</div>
@@ -1816,17 +1857,12 @@
 
     function renderLists(sortedEntries) {
       const desc = [...sortedEntries].reverse();
-      const recentEl = document.getElementById('recent-list');
       const fullEl = document.getElementById('full-history-list');
 
       if (desc.length === 0) {
-        const emptyHtml = `<div class="empty-state">Aún no hay registros.<br>Pulsa <strong>+ Gasolina</strong> o <strong>+ Recarga</strong> para añadir el primero.</div>`;
-        recentEl.innerHTML = emptyHtml;
-        fullEl.innerHTML = emptyHtml;
+        fullEl.innerHTML = `<div class="empty-state">Aún no hay registros.<br>Vuelve a <strong>Inicio</strong> y pulsa <strong>+ Gasolina</strong> o <strong>+ Recarga</strong>.</div>`;
         return;
       }
-
-      recentEl.innerHTML = desc.slice(0, 5).map(buildTxCard).join('');
 
       let filteredHistory = desc;
       if (historyFilter === 'gas' || historyFilter === 'ev') {
@@ -1888,15 +1924,6 @@
       const excess = Math.max(0, driven - limit);
       const pct = Math.min(100, Math.round((driven / limit) * 100));
       const fillClass = pct >= 95 ? 'danger' : (pct >= 80 ? 'warn' : '');
-
-      document.getElementById('home-leasing-rem').textContent = excess > 0
-        ? `Exceso: +${excess.toLocaleString('es-ES')} km`
-        : `Quedan ${remaining.toLocaleString('es-ES')} km`;
-      document.getElementById('home-leasing-rem').style.color = excess > 0 ? 'var(--danger)' : 'var(--bbva-cyan)';
-      const homeFill = document.getElementById('home-leasing-fill');
-      homeFill.style.width = pct + '%';
-      homeFill.className = 'progress-fill ' + fillClass;
-      document.getElementById('home-leasing-used').textContent = `Consumidos: ${driven.toLocaleString('es-ES')} / ${limit.toLocaleString('es-ES')} km (${pct}%)`;
 
       const startDate = l.startDate ? new Date(l.startDate + 'T00:00:00') : new Date();
       const today = new Date();
@@ -2003,12 +2030,79 @@
         `Ahorras ${fmtEur(diff)} en este viaje saliendo con batería cargada`;
     }
 
-    function switchTab(tab) {
-      document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
+    // CAMBIO DE PESTAÑAS CON ANIMACIÓN DIRECCIONAL
+    function switchTab(tab, slideDirection = '') {
+      currentTab = tab;
+      document.querySelectorAll('.view-section').forEach(s => {
+        s.classList.remove('active', 'slide-left', 'slide-right');
+      });
       document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-      document.getElementById('view-' + tab).classList.add('active');
-      document.getElementById('nav-' + tab).classList.add('active');
+      document.getElementById('btn-header-data').classList.remove('active');
+
+      const targetSection = document.getElementById('view-' + tab);
+      if (targetSection) {
+        targetSection.classList.add('active');
+        if (slideDirection === 'left') targetSection.classList.add('slide-left');
+        if (slideDirection === 'right') targetSection.classList.add('slide-right');
+      }
+
+      const navBtn = document.getElementById('nav-' + tab);
+      if (navBtn) {
+        navBtn.classList.add('active');
+      } else if (tab === 'data') {
+        document.getElementById('btn-header-data').classList.add('active');
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
+
+    // DETECTOR TÁCTIL DE DESLIZAMIENTO IZQUIERDA / DERECHA
+    (function initSwipeNavigation() {
+      let startX = 0;
+      let startY = 0;
+      let startTime = 0;
+      let ignoreSwipe = false;
+
+      document.addEventListener('touchstart', (e) => {
+        if (e.touches.length !== 1) return;
+        const modalOpen = document.querySelector('.modal-backdrop.open');
+        const interactiveTarget = e.target.closest('input, select, textarea, .filter-pills');
+        if (modalOpen || interactiveTarget) {
+          ignoreSwipe = true;
+          return;
+        }
+        ignoreSwipe = false;
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
+        startTime = Date.now();
+      }, { passive: true });
+
+      document.addEventListener('touchend', (e) => {
+        if (ignoreSwipe || e.changedTouches.length !== 1) return;
+        const dx = e.changedTouches[0].clientX - startX;
+        const dy = e.changedTouches[0].clientY - startY;
+        const dt = Date.now() - startTime;
+
+        if (dt < 600 && Math.abs(dx) > 55 && Math.abs(dx) > Math.abs(dy) * 1.45) {
+          if (dx < 0) {
+            // Deslizar hacia la izquierda -> siguiente pestaña
+            const idx = TAB_ORDER.indexOf(currentTab);
+            if (idx >= 0 && idx < TAB_ORDER.length - 1) {
+              switchTab(TAB_ORDER[idx + 1], 'left');
+            }
+          } else {
+            // Deslizar hacia la derecha -> pestaña anterior
+            if (currentTab === 'data') {
+              switchTab('home', 'right');
+            } else {
+              const idx = TAB_ORDER.indexOf(currentTab);
+              if (idx > 0) {
+                switchTab(TAB_ORDER[idx - 1], 'right');
+              }
+            }
+          }
+        }
+      }, { passive: true });
+    })();
 
     function setHistoryFilter(filter, btn) {
       historyFilter = filter;
