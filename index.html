@@ -45,6 +45,10 @@
       -webkit-tap-highlight-color: transparent;
     }
 
+    html, body {
+      overscroll-behavior: none;
+    }
+
     body {
       background-color: var(--bg-app);
       color: var(--text-main);
@@ -56,11 +60,14 @@
       overflow-x: hidden;
     }
 
-    /* HEADER OSCURO BBVA-CYAN */
+    /* HEADER OSCURO BBVA-CYAN FIJO ARRIBA */
     .app-header {
+      position: sticky;
+      top: 0;
+      z-index: 80;
       background: linear-gradient(160deg, #040A14 0%, #072146 65%, #0A2E5C 100%);
       color: #FFFFFF;
-      padding: 16px 14px 18px;
+      padding: 14px 14px 16px;
       border-bottom-left-radius: 22px;
       border-bottom-right-radius: 22px;
       border-bottom: 1px solid rgba(45, 204, 205, 0.25);
@@ -72,7 +79,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 14px;
+      margin-bottom: 12px;
       gap: 8px;
     }
 
@@ -232,22 +239,21 @@
       flex-direction: column;
     }
 
-    /* DISTRIBUCIÓN A PANTALLA COMPLETA EN INICIO */
+    /* DISTRIBUCIÓN COMPACTA EN INICIO */
     #view-home.active {
-      flex: 1;
       display: flex;
       flex-direction: column;
-      justify-content: space-between;
-      gap: 14px;
-      padding-top: 16px;
-      padding-bottom: 6px;
+      justify-content: flex-start;
+      gap: 11px;
+      padding-top: 14px;
+      padding-bottom: 8px;
     }
 
-    /* TARJETA PRINCIPAL DE GASTOS SEPARADOS (DEBAJO DE CABECERA) */
+    /* TARJETA PRINCIPAL DE GASTOS SEPARADOS */
     .hero-card {
       background: var(--card-bg);
       border-radius: var(--radius-lg);
-      padding: 20px 18px;
+      padding: 16px;
       margin-top: 0;
       box-shadow: var(--shadow-md);
       border: 1px solid var(--border-light);
@@ -257,9 +263,9 @@
       display: flex;
       justify-content: space-between;
       align-items: flex-end;
-      padding-bottom: 16px;
+      padding-bottom: 12px;
       border-bottom: 1px solid var(--border-subtle);
-      margin-bottom: 16px;
+      margin-bottom: 12px;
     }
 
     .total-label {
@@ -271,11 +277,11 @@
     }
 
     .total-amount {
-      font-size: 32px;
+      font-size: 31px;
       font-weight: 800;
       color: #FFFFFF;
       line-height: 1.1;
-      margin-top: 3px;
+      margin-top: 2px;
     }
 
     .km-badge { text-align: right; }
@@ -295,13 +301,13 @@
     .split-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-bottom: 16px;
+      gap: 10px;
+      margin-bottom: 12px;
     }
 
     .energy-box {
       border-radius: var(--radius-md);
-      padding: 16px 12px;
+      padding: 13px 12px;
       position: relative;
       overflow: hidden;
       border: 1px solid transparent;
@@ -321,7 +327,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
 
     .energy-title {
@@ -346,10 +352,10 @@
     .ev .energy-pct { color: var(--bbva-cyan); }
 
     .energy-amount {
-      font-size: 23px;
+      font-size: 22px;
       font-weight: 800;
       color: #FFFFFF;
-      margin-bottom: 5px;
+      margin-bottom: 4px;
     }
 
     .energy-meta {
@@ -402,7 +408,7 @@
       background: linear-gradient(135deg, #072146 0%, #0C3266 100%);
       color: #FFFFFF;
       border-radius: var(--radius-lg);
-      padding: 18px 16px;
+      padding: 14px 16px;
       margin-top: 0;
       border: 1px solid rgba(45, 204, 205, 0.32);
       box-shadow: var(--shadow-sm);
@@ -412,7 +418,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
       gap: 8px;
     }
 
@@ -446,11 +452,11 @@
     }
 
     .bono-track {
-      height: 11px;
+      height: 10px;
       background: rgba(5, 14, 28, 0.65);
       border-radius: 999px;
       overflow: hidden;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
     }
 
     .bono-fill {
@@ -475,14 +481,14 @@
     .quick-actions {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 12px;
+      gap: 10px;
       margin: 0;
     }
 
     .btn-action {
       border: none;
       border-radius: var(--radius-md);
-      padding: 16px 12px;
+      padding: 15px 12px;
       font-size: 15px;
       font-weight: 700;
       cursor: pointer;
@@ -514,7 +520,7 @@
       text-align: center;
       font-size: 11px;
       color: var(--text-muted);
-      margin-top: 0;
+      margin-top: 2px;
       opacity: 0.75;
     }
 
@@ -1127,7 +1133,7 @@
 </head>
 <body>
 
-  <!-- CABECERA -->
+  <!-- CABECERA FIJA -->
   <header class="app-header">
     <div class="container">
       <div class="header-top">
@@ -1163,7 +1169,7 @@
 
   <main class="container">
 
-    <!-- VISTA 1: INICIO (CABINA RÁPIDA A PANTALLA COMPLETA) -->
+    <!-- VISTA 1: INICIO (TARJETAS COMPACTAS Y AGRUPADAS) -->
     <section id="view-home" class="view-section active">
       <div class="hero-card">
         <div class="total-row">
@@ -2084,15 +2090,18 @@
       } else if (tab === 'data') {
         document.getElementById('btn-header-data').classList.add('active');
       }
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      if (window.scrollY > 0) {
+        window.scrollTo({ top: 0, behavior: 'auto' });
+      }
     }
 
-    // DETECTOR TÁCTIL DE DESLIZAMIENTO IZQUIERDA / DERECHA
+    // DETECTOR TÁCTIL DE DESLIZAMIENTO IZQUIERDA / DERECHA (SIN REBOTE VERTICAL)
     (function initSwipeNavigation() {
       let startX = 0;
       let startY = 0;
       let startTime = 0;
       let ignoreSwipe = false;
+      let isHorizontalSwipe = false;
 
       document.addEventListener('touchstart', (e) => {
         if (e.touches.length !== 1) return;
@@ -2103,10 +2112,23 @@
           return;
         }
         ignoreSwipe = false;
+        isHorizontalSwipe = false;
         startX = e.touches[0].clientX;
         startY = e.touches[0].clientY;
         startTime = Date.now();
       }, { passive: true });
+
+      document.addEventListener('touchmove', (e) => {
+        if (ignoreSwipe || e.touches.length !== 1) return;
+        const dx = e.touches[0].clientX - startX;
+        const dy = e.touches[0].clientY - startY;
+        if (!isHorizontalSwipe && Math.abs(dx) > 12 && Math.abs(dx) > Math.abs(dy) * 1.2) {
+          isHorizontalSwipe = true;
+        }
+        if (isHorizontalSwipe) {
+          e.preventDefault();
+        }
+      }, { passive: false });
 
       document.addEventListener('touchend', (e) => {
         if (ignoreSwipe || e.changedTouches.length !== 1) return;
@@ -2114,7 +2136,7 @@
         const dy = e.changedTouches[0].clientY - startY;
         const dt = Date.now() - startTime;
 
-        if (dt < 600 && Math.abs(dx) > 55 && Math.abs(dx) > Math.abs(dy) * 1.45) {
+        if (dt < 650 && Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.35) {
           if (dx < 0) {
             const idx = TAB_ORDER.indexOf(currentTab);
             if (idx >= 0 && idx < TAB_ORDER.length - 1) {
