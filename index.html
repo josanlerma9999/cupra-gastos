@@ -8,7 +8,9 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <title>Cupra e-HYBRID · Leasing, Gastos y Km</title>
-  <link id="pwa-manifest" rel="manifest" href="" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" type="image/png" href="icon-512.png" />
+  <link rel="apple-touch-icon" href="icon-512.png" />
   <style>
     :root {
       color-scheme: dark;
@@ -1531,22 +1533,10 @@
   </div>
 
   <script>
-    // PWA MANIFEST DINÁMICO OSCURO
-    (function initPWA() {
-      const svgIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="110" fill="#050E1C"/><path d="M278 96L154 276h104l-24 140 124-180H254l24-140z" fill="#2DCCCD"/></svg>`;
-      const iconUrl = 'data:image/svg+xml;base64,' + btoa(svgIcon);
-      const manifest = {
-        name: 'Cupra e-HYBRID · Leasing y Gastos',
-        short_name: 'Cupra e-HYBRID',
-        start_url: '.',
-        display: 'standalone',
-        background_color: '#050E1C',
-        theme_color: '#050E1C',
-        icons: [{ src: iconUrl, sizes: '512x512', type: 'image/svg+xml' }]
-      };
-      const blob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
-      document.getElementById('pwa-manifest').href = URL.createObjectURL(blob);
-    })();
+    // REGISTRO DE SERVICE WORKER PARA PWA NATIVA Y PWABUILDER
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw.js').catch(console.error);
+    }
 
     // ESTADO DE LA APLICACIÓN (COMPATIBLE CON TODAS LAS VERSIONES)
     const STORAGE_KEY = 'cupra_ehybrid_data_v1';
