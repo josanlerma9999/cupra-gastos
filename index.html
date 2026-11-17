@@ -7,7 +7,7 @@
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <title>Cupra e-HYBRID · Leasing, Gastos y Km</title>
+  <title>Cupra e-HYBRID · Control de Gastos</title>
   <link rel="manifest" href="manifest.json" />
   <link rel="icon" type="image/png" href="icon-512.png" />
   <link rel="apple-touch-icon" href="icon-512.png" />
@@ -91,7 +91,7 @@
     }
 
     .brand-title h1 {
-      font-size: 17.5px;
+      font-size: 18px;
       font-weight: 700;
       letter-spacing: -0.3px;
       color: #FFFFFF;
@@ -868,7 +868,7 @@
       color: #FCA5A5;
     }
 
-    /* NAVEGACIÓN INFERIOR 5 PESTAÑAS */
+    /* NAVEGACIÓN INFERIOR 5 PESTAÑAS (ALTURA FIJA SIN SALTOS) */
     .bottom-nav {
       position: fixed;
       bottom: 0;
@@ -889,7 +889,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
+      justify-content: flex-start;
       gap: 3px;
       color: var(--text-muted);
       cursor: pointer;
@@ -901,12 +901,26 @@
     .nav-btn .nav-ico {
       font-size: 19px;
       line-height: 1;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .nav-btn .nav-txt {
       font-size: 12px;
       font-weight: 700;
       letter-spacing: -0.2px;
+      line-height: 1.15;
+    }
+
+    .nav-btn span.nav-dot {
+      width: 22px;
+      height: 3px;
+      background: transparent;
+      border-radius: 99px;
+      margin-top: 2px;
+      transition: background 0.15s ease;
     }
 
     .nav-btn.active {
@@ -914,11 +928,7 @@
     }
 
     .nav-btn.active span.nav-dot {
-      width: 22px;
-      height: 3px;
       background: var(--bbva-cyan);
-      border-radius: 99px;
-      margin-top: 1px;
     }
 
     /* VISTAS Y ANIMACIÓN DE DESLIZAMIENTO */
@@ -1123,7 +1133,7 @@
       <div class="header-top">
         <div class="brand-title">
           <span class="tag">Cupra León e-HYBRID</span>
-          <h1>Control de Energía y Km</h1>
+          <h1>Control de Gastos</h1>
         </div>
         <div class="header-actions">
           <div class="odo-pill" onclick="openOdoModal()" title="Actualizar odómetro">
@@ -1378,7 +1388,7 @@
 
   </main>
 
-  <!-- NAVEGACIÓN INFERIOR (5 PESTAÑAS) -->
+  <!-- NAVEGACIÓN INFERIOR (5 PESTAÑAS SIN DESPLAZAMIENTO VERTICAL) -->
   <nav class="bottom-nav">
     <button class="nav-btn active" id="nav-home" onclick="switchTab('home')">
       <span class="nav-ico">🏠</span>
@@ -1588,7 +1598,7 @@
   </div>
 
   <script>
-    // REGISTRO DE SERVICE WORKER PARA PWA NATIVA Y PWABUILDER
+    // REGISTRO DE SERVICE WORKER PARA PWA NATIVA
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('./sw.js').catch(console.error);
     }
@@ -2106,13 +2116,11 @@
 
         if (dt < 600 && Math.abs(dx) > 55 && Math.abs(dx) > Math.abs(dy) * 1.45) {
           if (dx < 0) {
-            // Deslizar hacia la izquierda -> siguiente pestaña
             const idx = TAB_ORDER.indexOf(currentTab);
             if (idx >= 0 && idx < TAB_ORDER.length - 1) {
               switchTab(TAB_ORDER[idx + 1], 'left');
             }
           } else {
-            // Deslizar hacia la derecha -> pestaña anterior
             if (currentTab === 'data') {
               switchTab('home', 'right');
             } else {
