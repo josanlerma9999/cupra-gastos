@@ -1,0 +1,19 @@
+{
+  "name": "Cupra e-HYBRID · Leasing y Gastos",
+  "short_name": "Cupra e-HYBRID",
+  "description": "Control de gasolina, recargas Waylet y kilómetros de leasing",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#050E1C",
+  "theme_color": "#050E1C",
+  "icons": [
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
