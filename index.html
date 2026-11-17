@@ -641,24 +641,24 @@
       text-transform: capitalize;
     }
 
-    /* LISTA DE MOVIMIENTOS */
+    /* HISTORIAL: 3 PESTAÑAS SIMÉTRICAS + RESUMEN + PROVEEDORES */
     .filter-pills {
-      display: flex;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
       gap: 8px;
-      margin-bottom: 12px;
-      overflow-x: auto;
-      padding-bottom: 2px;
+      margin-bottom: 10px;
     }
 
     .pill {
-      padding: 7px 14px;
+      padding: 8px 6px;
       border-radius: 999px;
       border: 1px solid var(--border-light);
       background: var(--card-bg);
-      font-size: 12.5px;
+      font-size: 13px;
       font-weight: 600;
       color: var(--text-muted);
       cursor: pointer;
+      text-align: center;
       white-space: nowrap;
     }
 
@@ -667,6 +667,30 @@
       color: #050E1C;
       border-color: var(--bbva-cyan);
       font-weight: 700;
+    }
+
+    .history-summary-strip {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      background: var(--card-inset);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-md);
+      padding: 10px 8px;
+      margin-bottom: 12px;
+      text-align: center;
+    }
+
+    .hs-item .hs-v {
+      font-size: 13.5px;
+      font-weight: 800;
+      color: #FFFFFF;
+    }
+
+    .hs-item .hs-l {
+      font-size: 10.5px;
+      color: var(--text-muted);
+      margin-top: 2px;
     }
 
     .tx-list {
@@ -776,6 +800,46 @@
 
     .tx-btn.del { color: var(--danger); }
 
+    /* DESGLOSE POR PROVEEDOR EN HISTORIAL */
+    .place-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 9px 0;
+      border-bottom: 1px solid var(--border-subtle);
+      font-size: 13px;
+    }
+
+    .place-row:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .place-row:first-child {
+      padding-top: 0;
+    }
+
+    .place-name {
+      font-weight: 700;
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .place-sub {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .place-val {
+      text-align: right;
+      font-weight: 800;
+      color: var(--bbva-cyan);
+      font-size: 13.5px;
+    }
+
     /* CALCULADORA DE VIAJES */
     .trip-result-grid {
       display: grid;
@@ -830,7 +894,7 @@
       text-align: center;
     }
 
-    /* LEASING TRACKER */
+    /* LEASING TRACKER AMPLIADO */
     .leasing-hero-numbers {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -865,6 +929,40 @@
     }
 
     .leasing-stat-box.accent .val { color: var(--bbva-cyan); }
+
+    .leasing-metrics-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .lm-box {
+      background: var(--card-inset);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 10px 11px;
+    }
+
+    .lm-box .lm-t {
+      font-size: 10.5px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      font-weight: 700;
+    }
+
+    .lm-box .lm-v {
+      font-size: 16px;
+      font-weight: 800;
+      color: #FFFFFF;
+      margin-top: 3px;
+    }
+
+    .lm-box .lm-s {
+      font-size: 11px;
+      color: #CBD5E1;
+      margin-top: 2px;
+    }
 
     .progress-track {
       height: 12px;
@@ -1316,18 +1414,33 @@
       </div>
     </section>
 
-    <!-- VISTA 3: HISTORIAL COMPLETO -->
+    <!-- VISTA 3: HISTORIAL COMPLETO (3 PESTAÑAS + RESUMEN + PROVEEDORES) -->
     <section id="view-history" class="view-section">
       <div class="section-title">
         <span>Historial de Energía</span>
+        <span id="history-scope-badge" style="font-size:12px; color:var(--bbva-cyan); font-weight:700;">Histórico completo</span>
       </div>
       <div class="filter-pills">
         <button class="pill active" onclick="setHistoryFilter('all', this)">Todos</button>
         <button class="pill" onclick="setHistoryFilter('gas', this)">⛽ Gasolina</button>
         <button class="pill" onclick="setHistoryFilter('ev', this)">⚡ Recarga</button>
-        <button class="pill" onclick="setHistoryFilter('full', this)">✅ Depósito Lleno</button>
+      </div>
+      <div class="history-summary-strip" id="history-summary-strip">
+        <div class="hs-item">
+          <div class="hs-v" id="hs-count">0</div>
+          <div class="hs-l">Registros</div>
+        </div>
+        <div class="hs-item">
+          <div class="hs-v" id="hs-volume">0 L · 0 kWh</div>
+          <div class="hs-l">Energía acumulada</div>
+        </div>
+        <div class="hs-item">
+          <div class="hs-v" id="hs-total" style="color: var(--bbva-cyan);">0,00 €</div>
+          <div class="hs-l">Gasto directo</div>
+        </div>
       </div>
       <div id="full-history-list" class="tx-list"></div>
+      <div id="history-places-section"></div>
     </section>
 
     <!-- VISTA 4: CALCULADORA DE VIAJES -->
@@ -1391,7 +1504,7 @@
         <span>Control de Kilómetros Leasing</span>
         <button class="tx-btn" onclick="openLeasingModal()">Configurar contrato</button>
       </div>
-      <div class="card" id="leasing-container"></div>
+      <div id="leasing-container"></div>
     </section>
 
     <!-- VISTA 6 (CABECERA): DATOS Y BACKUP -->
@@ -1931,22 +2044,86 @@
     function renderLists(sortedEntries) {
       const desc = [...sortedEntries].reverse();
       const fullEl = document.getElementById('full-history-list');
-
-      if (desc.length === 0) {
-        fullEl.innerHTML = `<div class="empty-state">Aún no hay registros.<br>Vuelve a <strong>Inicio</strong> y pulsa <strong>+ Gasolina</strong> o <strong>+ Recarga</strong>.</div>`;
-        return;
-      }
+      const placesEl = document.getElementById('history-places-section');
 
       let filteredHistory = desc;
       if (historyFilter === 'gas' || historyFilter === 'ev') {
         filteredHistory = desc.filter(e => e.type === historyFilter);
-      } else if (historyFilter === 'full') {
-        filteredHistory = desc.filter(e => e.type === 'gas' && e.fullTank);
+      }
+
+      // Actualizar barra de resumen dinámico del filtro
+      const fCount = filteredHistory.length;
+      const fLiters = filteredHistory.filter(e => e.type === 'gas').reduce((s, e) => s + (Number(e.qty) || 0), 0);
+      const fKwh = filteredHistory.filter(e => e.type === 'ev').reduce((s, e) => s + (Number(e.qty) || 0), 0);
+      const fSpent = filteredHistory.reduce((s, e) => s + (Number(e.total) || 0), 0);
+
+      document.getElementById('hs-count').textContent = fCount;
+      if (historyFilter === 'gas') {
+        document.getElementById('hs-volume').textContent = `${fmtNum(fLiters, 2)} L`;
+      } else if (historyFilter === 'ev') {
+        document.getElementById('hs-volume').textContent = `${fmtNum(fKwh, 1)} kWh`;
+      } else {
+        document.getElementById('hs-volume').textContent = `${fmtNum(fLiters, 1)} L · ${fmtNum(fKwh, 1)} kWh`;
+      }
+      document.getElementById('hs-total').textContent = fmtEur(fSpent);
+
+      if (desc.length === 0) {
+        fullEl.innerHTML = `<div class="empty-state">Aún no hay registros.<br>Vuelve a <strong>Inicio</strong> y pulsa <strong>+ Gasolina</strong> o <strong>+ Recarga</strong>.</div>`;
+        placesEl.innerHTML = '';
+        return;
       }
 
       fullEl.innerHTML = filteredHistory.length
         ? filteredHistory.map(buildTxCard).join('')
         : `<div class="empty-state">No hay registros en esta categoría.</div>`;
+
+      // Desglose por Gasolinera / Punto de Recarga
+      if (filteredHistory.length > 0) {
+        const placeMap = {};
+        filteredHistory.forEach(e => {
+          const name = (e.place && e.place.trim())
+            ? e.place.trim()
+            : (e.type === 'gas' ? 'Gasolinera sin especificar' : 'Punto de recarga');
+          const key = `${e.type}_${name.toLowerCase()}`;
+          if (!placeMap[key]) {
+            placeMap[key] = {
+              name,
+              type: e.type,
+              count: 0,
+              qty: 0,
+              spent: 0
+            };
+          }
+          placeMap[key].count += 1;
+          placeMap[key].qty += Number(e.qty) || 0;
+          placeMap[key].spent += Number(e.total) || 0;
+        });
+
+        const placesArr = Object.values(placeMap).sort((a, b) => b.count - a.count || b.spent - a.spent);
+        placesEl.innerHTML = `
+          <div class="section-title" style="margin-top: 16px;">
+            <span>Desglose por Proveedor</span>
+          </div>
+          <div class="card" style="margin-bottom: 4px;">
+            ${placesArr.map(p => {
+              const ico = p.type === 'gas' ? '⛽' : '⚡';
+              const unit = p.type === 'gas' ? `${fmtNum(p.qty, 2)} L` : `${fmtNum(p.qty, 1)} kWh`;
+              const visits = p.count === 1 ? '1 vez' : `${p.count} veces`;
+              return `
+                <div class="place-row">
+                  <div>
+                    <div class="place-name">${ico} ${p.name}</div>
+                    <div class="place-sub">${visits} · ${unit} acumulados</div>
+                  </div>
+                  <div class="place-val">${p.spent === 0 && p.type === 'ev' ? 'Bono' : fmtEur(p.spent)}</div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        `;
+      } else {
+        placesEl.innerHTML = '';
+      }
     }
 
     function buildTxCard(e) {
@@ -1987,7 +2164,7 @@
       `;
     }
 
-    // RENDER CONTROL DE LEASING (25.000 KM/AÑO)
+    // RENDER CONTROL DE LEASING (25.000 KM/AÑO + COLCHÓN + MÉTRICAS)
     function renderLeasing(currentOdo) {
       const l = appState.leasing;
       const limit = Number(l.annualLimit) || 25000;
@@ -1999,15 +2176,27 @@
       const fillClass = pct >= 95 ? 'danger' : (pct >= 80 ? 'warn' : '');
 
       const startDate = l.startDate ? new Date(l.startDate + 'T00:00:00') : new Date();
+      const endDate = new Date(startDate.getTime() + 365 * 24 * 60 * 60 * 1000);
+      const endDateStr = endDate.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
+
       const today = new Date();
       const msPerDay = 1000 * 60 * 60 * 24;
       const elapsedDays = Math.max(1, Math.floor((today - startDate) / msPerDay));
       const remainingDays = Math.max(0, 365 - elapsedDays);
 
       const dailyAvg = driven / elapsedDays;
+      const weeklyAvg = dailyAvg * 7;
       const projectedAnnual = Math.round(dailyAvg * 365);
       const allowedDailyRemaining = remainingDays > 0 ? (remaining / remainingDays) : 0;
+      const allowedWeeklyRemaining = allowedDailyRemaining * 7;
       const allowedMonthlyRemaining = allowedDailyRemaining * 30.4;
+
+      const idealKmToday = Math.round((limit / 365) * Math.min(365, elapsedDays));
+      const cushionKm = idealKmToday - driven;
+      const cushionColor = cushionKm >= 0 ? 'var(--success)' : 'var(--fuel-amber)';
+      const cushionText = cushionKm >= 0
+        ? `+${cushionKm.toLocaleString('es-ES')} km`
+        : `${cushionKm.toLocaleString('es-ES')} km`;
 
       let paceClass = '';
       let paceMsg = '';
@@ -2023,31 +2212,72 @@
         paceMsg = `✅ Vas dentro del cupo: a este ritmo cerrarás el año en unos <strong>${projectedAnnual.toLocaleString('es-ES')} km</strong>. Dispones de <strong>${fmtNum(allowedDailyRemaining, 1)} km/día</strong> (${Math.round(allowedMonthlyRemaining).toLocaleString('es-ES')} km/mes) durante los próximos ${remainingDays} días.`;
       }
 
+      const extraTrips500 = cushionKm > 0 ? Math.floor(cushionKm / 500) : 0;
+      const marginTip = excess > 0
+        ? `Coste actual por exceso (${fmtNum(Number(l.extraKmCost) || 0, 2)} €/km): <strong>${fmtEur(excess * (Number(l.extraKmCost) || 0))}</strong>.`
+        : cushionKm >= 0
+          ? `Tu colchón actual de <strong>${cushionKm.toLocaleString('es-ES')} km a favor</strong> equivale a <strong>${extraTrips500} escapadas extra</strong> de 500 km (ida y vuelta) sin salirte del contrato.`
+          : `Llevas <strong>${Math.abs(cushionKm).toLocaleString('es-ES')} km</strong> más de la media lineal esperada para hoy. Reduciendo ~${Math.ceil(Math.abs(cushionKm) / Math.max(1, remainingDays / 7))} km/semana vuelves a la línea ideal.`;
+
       document.getElementById('leasing-container').innerHTML = `
-        <div class="leasing-hero-numbers">
-          <div class="leasing-stat-box">
-            <div class="lbl">Km Consumidos</div>
-            <div class="val">${driven.toLocaleString('es-ES')} km</div>
+        <div class="card">
+          <div class="leasing-hero-numbers">
+            <div class="leasing-stat-box">
+              <div class="lbl">Km Consumidos</div>
+              <div class="val">${driven.toLocaleString('es-ES')} km</div>
+            </div>
+            <div class="leasing-stat-box accent">
+              <div class="lbl">Km Disponibles</div>
+              <div class="val">${remaining.toLocaleString('es-ES')} km</div>
+            </div>
           </div>
-          <div class="leasing-stat-box accent">
-            <div class="lbl">Km Disponibles</div>
-            <div class="val">${remaining.toLocaleString('es-ES')} km</div>
+
+          <div style="display:flex; justify-content:space-between; font-size:12.5px; font-weight:700; margin-bottom:6px;">
+            <span>Cupo anual: ${limit.toLocaleString('es-ES')} km</span>
+            <span>${pct}% utilizado</span>
           </div>
+          <div class="progress-track">
+            <div class="progress-fill ${fillClass}" style="width: ${pct}%"></div>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:11.5px; color:var(--text-muted); margin-top:6px;">
+            <span>Inicio: ${l.startDate || 'Hoy'} (${elapsedDays} días)</span>
+            <span>Quedan ${remainingDays} días</span>
+          </div>
+
+          <div class="leasing-metrics-grid">
+            <div class="lm-box">
+              <div class="lm-t">Colchón vs. Ideal Hoy</div>
+              <div class="lm-v" style="color: ${cushionColor};">${cushionText}</div>
+              <div class="lm-s">Ideal hoy: ${idealKmToday.toLocaleString('es-ES')} km</div>
+            </div>
+            <div class="lm-box">
+              <div class="lm-t">Ritmo Real Actual</div>
+              <div class="lm-v">${fmtNum(dailyAvg, 1)} km/día</div>
+              <div class="lm-s">${Math.round(weeklyAvg).toLocaleString('es-ES')} km/semana</div>
+            </div>
+            <div class="lm-box">
+              <div class="lm-t">Margen Permitido</div>
+              <div class="lm-v">${Math.round(allowedMonthlyRemaining).toLocaleString('es-ES')} km/mes</div>
+              <div class="lm-s">${Math.round(allowedWeeklyRemaining).toLocaleString('es-ES')} km/semana</div>
+            </div>
+            <div class="lm-box">
+              <div class="lm-t">Renovación Anual</div>
+              <div class="lm-v">${endDateStr}</div>
+              <div class="lm-s">Faltan ~${Math.max(0, Math.round(remainingDays / 30.4))} meses</div>
+            </div>
+          </div>
+
+          <div class="pace-banner ${paceClass}">${paceMsg}</div>
         </div>
 
-        <div style="display:flex; justify-content:space-between; font-size:12.5px; font-weight:700; margin-bottom:6px;">
-          <span>Cupo anual: ${limit.toLocaleString('es-ES')} km</span>
-          <span>${pct}% utilizado</span>
+        <div class="card" style="margin-bottom: 4px;">
+          <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--bbva-cyan); margin-bottom: 6px;">
+            🎯 Margen para Viajes y Escapadas
+          </div>
+          <p style="font-size: 12.5px; color: #CBD5E1; line-height: 1.45;">
+            ${marginTip}
+          </p>
         </div>
-        <div class="progress-track">
-          <div class="progress-fill ${fillClass}" style="width: ${pct}%"></div>
-        </div>
-        <div style="display:flex; justify-content:space-between; font-size:11.5px; color:var(--text-muted); margin-top:6px;">
-          <span>Inicio: ${l.startDate || 'Hoy'} (${elapsedDays} días)</span>
-          <span>Quedan ${remainingDays} días de contrato</span>
-        </div>
-
-        <div class="pace-banner ${paceClass}">${paceMsg}</div>
       `;
     }
 
