@@ -81,7 +81,7 @@
       justify-content: space-between;
       align-items: center;
       margin-bottom: 12px;
-      gap: 6px;
+      gap: 8px;
     }
 
     .brand-title {
@@ -91,46 +91,49 @@
     }
 
     .brand-title span.tag {
-      font-size: 10.5px;
+      font-size: 10px;
       text-transform: uppercase;
-      letter-spacing: 0.9px;
+      letter-spacing: 0.6px;
       color: var(--bbva-cyan);
       font-weight: 700;
+      white-space: nowrap;
     }
 
     .brand-title h1 {
-      font-size: 17.5px;
+      font-size: 17px;
       font-weight: 700;
       letter-spacing: -0.3px;
       color: #FFFFFF;
       white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
     }
 
     .header-actions {
       display: flex;
       align-items: center;
-      gap: 5px;
+      gap: 6px;
       flex-shrink: 0;
     }
 
     .odo-pill {
       background: rgba(45, 204, 205, 0.12);
       border: 1px solid rgba(45, 204, 205, 0.4);
-      padding: 5px 9px;
+      padding: 6px 10px;
       border-radius: 999px;
-      font-size: 11.5px;
-      font-weight: 600;
-      color: #E2E8F0;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--bbva-cyan);
       display: flex;
       align-items: center;
-      gap: 4px;
+      justify-content: center;
       cursor: pointer;
       white-space: nowrap;
+      font-variant-numeric: tabular-nums;
     }
 
-    .odo-pill strong { color: var(--bbva-cyan); }
+    .odo-pill strong {
+      color: var(--bbva-cyan);
+      font-weight: 700;
+    }
 
     .header-icon-btn {
       background: rgba(45, 204, 205, 0.12);
@@ -1386,7 +1389,6 @@
         </div>
         <div class="header-actions">
           <div class="odo-pill" onclick="openOdoModal()" title="Actualizar odómetro">
-            <span>Odómetro:</span>
             <strong id="header-odo">0 km</strong>
           </div>
           <button type="button" class="header-icon-btn" id="btn-header-refresh" onclick="updateApp()" title="Actualizar app a última versión" aria-label="Actualizar app">
@@ -2694,7 +2696,6 @@
     function parseSpanishNumber(raw) {
       if (!raw) return NaN;
       let cleaned = String(raw).trim().replace(/\s+/g, '');
-      // Si tiene coma y punto, tomar el último como decimal
       if (cleaned.includes(',') && cleaned.includes('.')) {
         if (cleaned.lastIndexOf(',') > cleaned.lastIndexOf('.')) {
           cleaned = cleaned.replace(/\./g, '').replace(',', '.');
@@ -2747,7 +2748,6 @@
     }
 
     function extractDateFromText(text) {
-      // Busca formatos DD/MM/YYYY, DD-MM-YYYY, DD.MM.YYYY o DD/MM/YY
       const m = text.match(/\b(0?[1-9]|[12]\d|3[01])[\/\-\.](0?[1-9]|1[0-2])[\/\-\.](20\d{2}|\d{2})\b/);
       if (m) {
         const day = m[1].padStart(2, '0');
@@ -2759,7 +2759,6 @@
           return `${year}-${month}-${day}`;
         }
       }
-      // Formato ISO YYYY-MM-DD
       const iso = text.match(/\b(20\d{2})[\/\-](0[1-9]|1[0-2])[\/\-](0[1-9]|[12]\d|3[01])\b/);
       if (iso) {
         return `${iso[1]}-${iso[2]}-${iso[3]}`;
@@ -2798,7 +2797,6 @@
         let unitPrice = NaN;
         let total = NaN;
 
-        // Litros por palabra clave o unidad L / LTR
         const litRegexes = [
           /(?:LITROS|LTR|CANTIDAD|CANT\.?|VOLUMEN|VOL\.?)\s*[:=\-]?\s*(\d{1,3}[.,]\d{1,3})/i,
           /(\d{1,3}[.,]\d{2,3})\s*(?:L|LTR|LITROS)\b/i
@@ -2811,7 +2809,6 @@
           }
         }
 
-        // Precio €/L (3 decimales típicos en España, ej. 1,489)
         const priceRegexes = [
           /(?:PRECIO|P\.?\s*UNIT|PVP|EUR\/L|€\/L)\s*[:=\-]?\s*(\d[.,]\d{2,3})/i,
           /(\d[.,]\d{3})\s*(?:€\/L|EUR\/L|€|EUR)?/i
@@ -2824,7 +2821,6 @@
           }
         }
 
-        // Importe Total (€)
         const totalRegexes = [
           /(?:TOTAL(?:\s+A\s+PAGAR|\s+EUR|\s+€)?|IMPORTE(?:\s+TOTAL)?|A\s+PAGAR|TARJETA|VISA|MASTERCARD)\s*[:=\-]?\s*(\d{1,3}[.,]\d{2})/i,
           /(\d{1,3}[.,]\d{2})\s*(?:€|EUR)\b/i
@@ -2837,7 +2833,6 @@
           }
         }
 
-        // Reconciliación matemática si faltó uno de los 3 datos
         if (!isNaN(liters) && !isNaN(unitPrice) && isNaN(total)) {
           total = +(liters * unitPrice).toFixed(2);
         } else if (!isNaN(total) && !isNaN(unitPrice) && isNaN(liters)) {
