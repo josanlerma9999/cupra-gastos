@@ -510,7 +510,7 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 11px;
-      min-height: 112px;
+      min-height: 118px;
       margin: 0;
     }
 
@@ -561,15 +561,6 @@
       color: var(--bbva-cyan);
       border: 1px solid rgba(45, 204, 205, 0.45);
       border-bottom: 4px solid var(--bbva-cyan);
-    }
-
-    .swipe-hint {
-      text-align: center;
-      font-size: 11px;
-      color: var(--text-muted);
-      margin-top: 0;
-      opacity: 0.72;
-      flex-shrink: 0;
     }
 
     /* SECCIONES Y TARJETAS */
@@ -909,7 +900,7 @@
       text-align: center;
     }
 
-    /* LEASING TRACKER CON CAJAS SUPERIORES AMPLIADAS */
+    /* LEASING TRACKER CON CAJAS SUPERIORES AMPLIADAS Y ALERTAS DE COLOR */
     #view-leasing.active {
       flex: 1;
       display: flex;
@@ -948,11 +939,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-    }
-
-    .leasing-stat-box.accent {
-      background: var(--bbva-cyan-soft);
-      border-color: rgba(45, 204, 205, 0.42);
+      transition: background 0.25s ease, border-color 0.25s ease;
     }
 
     .leasing-stat-box .lbl {
@@ -970,9 +957,33 @@
       margin-top: 6px;
       line-height: 1.1;
       letter-spacing: -0.5px;
+      font-variant-numeric: tabular-nums;
     }
 
-    .leasing-stat-box.accent .val { color: var(--bbva-cyan); }
+    /* Estados de color para KM Disponibles (>5000 cian, <=5000 ámbar, <=2000 rojo) */
+    .leasing-stat-box.avail-ok {
+      background: var(--bbva-cyan-soft);
+      border-color: rgba(45, 204, 205, 0.42);
+    }
+    .leasing-stat-box.avail-ok .val {
+      color: var(--bbva-cyan);
+    }
+
+    .leasing-stat-box.avail-warn {
+      background: var(--fuel-amber-soft);
+      border-color: rgba(245, 158, 11, 0.5);
+    }
+    .leasing-stat-box.avail-warn .val {
+      color: #FBBF24;
+    }
+
+    .leasing-stat-box.avail-danger {
+      background: rgba(248, 113, 113, 0.16);
+      border-color: rgba(248, 113, 113, 0.55);
+    }
+    .leasing-stat-box.avail-danger .val {
+      color: var(--danger);
+    }
 
     .leasing-metrics-grid {
       display: grid;
@@ -1019,7 +1030,7 @@
       height: 100%;
       background: var(--bbva-cyan);
       border-radius: 999px;
-      transition: width 0.3s ease;
+      transition: width 0.3s ease, background 0.25s ease;
     }
 
     .progress-fill.warn { background: var(--fuel-amber); }
@@ -1418,8 +1429,6 @@
           <span class="act-sub">kWh y bono Waylet</span>
         </button>
       </div>
-
-      <div class="swipe-hint">← Desliza a izquierda o derecha para cambiar de pantalla →</div>
     </section>
 
     <!-- VISTA 2: ANÁLISIS Y ESTADÍSTICAS -->
@@ -1888,6 +1897,12 @@
     const fmtEur = (n) => n.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
     const fmtNum = (n, dec = 1) => n.toLocaleString('es-ES', { minimumFractionDigits: dec, maximumFractionDigits: dec });
 
+    function formatDateES(isoStr) {
+      if (!isoStr || !isoStr.includes('-')) return isoStr || '';
+      const [y, m, d] = isoStr.split('-');
+      return `${d.padStart(2, '0')}/${m.padStart(2, '0')}/${y}`;
+    }
+
     function formatFullMonthLabel(ym) {
       if (!ym || !ym.includes('-')) return '';
       const [y, m] = ym.split('-').map(Number);
@@ -2238,7 +2253,42 @@
       `;
     }
 
-    // RENDER CONTROL DE LEASING (25.000 KM/AÑO SIN BLOQUE INFERIOR Y CON CAJAS AMPLIADAS)
+    // ANIMACIÓN CONTADOR DE 0 HASTA KM DISPONIBLES
+    let leasingAnimFrame = null;
+    function animateLeasingCounter(target) {
+      const el = document.getElementById('leasing-avail-val');
+      if (!el) return;
+      if (leasingAnimFrame) cancelAnimationFrame(leasingAnimFrame);
+
+      const endVal = Math.max(0, Math.round(target));
+      if (endVal === 0) {
+        el.textContent = '0 km';
+        return;
+      }
+
+      const duration = 750;
+      const startTime = performance.now();
+
+      function step(now) {
+        const elapsed = now - startTime;
+        const progress = Math.min(1, elapsed / duration);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        const current = Math.round(eased * endVal);
+        el.textContent = current.toLocaleString('es-ES') + ' km';
+
+        if (progress < 1) {
+          leasingAnimFrame = requestAnimationFrame(step);
+        } else {
+          el.textContent = endVal.toLocaleString('es-ES') + ' km';
+          leasingAnimFrame = null;
+        }
+      }
+
+      el.textContent = '0 km';
+      leasingAnimFrame = requestAnimationFrame(step);
+    }
+
+    // RENDER CONTROL DE LEASING (25.000 KM/AÑO + ALERTAS 5000 ÁMBAR / 2000 ROJO + CONTADOR)
     function renderLeasing(currentOdo) {
       const l = appState.leasing;
       const limit = Number(l.annualLimit) || 25000;
@@ -2247,9 +2297,20 @@
       const remaining = Math.max(0, limit - driven);
       const excess = Math.max(0, driven - limit);
       const pct = Math.min(100, Math.round((driven / limit) * 100));
-      const fillClass = pct >= 95 ? 'danger' : (pct >= 80 ? 'warn' : '');
+
+      // Color de alerta según km disponibles: >5000 cian, <=5000 ámbar, <=2000 rojo
+      let availBoxClass = 'avail-ok';
+      let fillClass = '';
+      if (remaining <= 2000) {
+        availBoxClass = 'avail-danger';
+        fillClass = 'danger';
+      } else if (remaining <= 5000) {
+        availBoxClass = 'avail-warn';
+        fillClass = 'warn';
+      }
 
       const startDate = l.startDate ? new Date(l.startDate + 'T00:00:00') : new Date();
+      const startDateStr = l.startDate ? formatDateES(l.startDate) : startDate.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
       const endDate = new Date(startDate.getTime() + 365 * 24 * 60 * 60 * 1000);
       const endDateStr = endDate.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
 
@@ -2279,9 +2340,12 @@
         paceClass = 'danger';
         paceMsg = `🚨 Has superado el límite anual en <strong>${excess.toLocaleString('es-ES')} km</strong>` +
           (penalty > 0 ? ` (penalización estimada: <strong>${fmtEur(penalty)}</strong>).` : '.');
-      } else if (projectedAnnual > limit) {
+      } else if (remaining <= 2000) {
+        paceClass = 'danger';
+        paceMsg = `🚨 Alerta crítica: solo te quedan <strong>${remaining.toLocaleString('es-ES')} km disponibles</strong> para los próximos ${remainingDays} días (media máxima de <strong>${fmtNum(allowedDailyRemaining, 1)} km/día</strong>).`;
+      } else if (remaining <= 5000 || projectedAnnual > limit) {
         paceClass = 'warn';
-        paceMsg = `⚠️ A tu ritmo actual (${fmtNum(dailyAvg, 1)} km/día), terminarías el año en <strong>${projectedAnnual.toLocaleString('es-ES')} km</strong>. Para no pasarte, limita la media a <strong>${fmtNum(allowedDailyRemaining, 1)} km/día</strong> (${Math.round(allowedMonthlyRemaining).toLocaleString('es-ES')} km/mes).`;
+        paceMsg = `⚠️ Aviso de cupo: te quedan <strong>${remaining.toLocaleString('es-ES')} km</strong> y a tu ritmo actual (${fmtNum(dailyAvg, 1)} km/día) cerrarías en <strong>${projectedAnnual.toLocaleString('es-ES')} km</strong>. Mantén una media máxima de <strong>${fmtNum(allowedDailyRemaining, 1)} km/día</strong> (${Math.round(allowedMonthlyRemaining).toLocaleString('es-ES')} km/mes).`;
       } else {
         paceMsg = `✅ Vas dentro del cupo: a este ritmo cerrarás el año en unos <strong>${projectedAnnual.toLocaleString('es-ES')} km</strong>. Dispones de <strong>${fmtNum(allowedDailyRemaining, 1)} km/día</strong> (${Math.round(allowedMonthlyRemaining).toLocaleString('es-ES')} km/mes) durante los próximos ${remainingDays} días.`;
       }
@@ -2294,9 +2358,9 @@
                 <div class="lbl">Km Consumidos</div>
                 <div class="val">${driven.toLocaleString('es-ES')} km</div>
               </div>
-              <div class="leasing-stat-box accent">
+              <div class="leasing-stat-box ${availBoxClass}">
                 <div class="lbl">Km Disponibles</div>
-                <div class="val">${remaining.toLocaleString('es-ES')} km</div>
+                <div class="val" id="leasing-avail-val">0 km</div>
               </div>
             </div>
 
@@ -2308,7 +2372,7 @@
               <div class="progress-fill ${fillClass}" style="width: ${pct}%"></div>
             </div>
             <div style="display:flex; justify-content:space-between; font-size:11.5px; color:var(--text-muted); margin-top:6px;">
-              <span>Inicio: ${l.startDate || 'Hoy'} (${elapsedDays} días)</span>
+              <span>Inicio: ${startDateStr} (${elapsedDays} días)</span>
               <span>Quedan ${remainingDays} días</span>
             </div>
 
@@ -2339,6 +2403,8 @@
           <div class="pace-banner ${paceClass}">${paceMsg}</div>
         </div>
       `;
+
+      animateLeasingCounter(remaining);
     }
 
     // CALCULADORA DE VIAJES (BATERÍA 20 KWH)
@@ -2393,7 +2459,7 @@
         `Ahorras ${fmtEur(diff)} en este viaje saliendo con batería cargada`;
     }
 
-    // CAMBIO DE PESTAÑAS CON ANIMACIÓN DIRECCIONAL
+    // CAMBIO DE PESTAÑAS CON ANIMACIÓN DIRECCIONAL Y REACTIVACIÓN DE CONTADOR
     function switchTab(tab, slideDirection = '') {
       currentTab = tab;
       document.querySelectorAll('.view-section').forEach(s => {
@@ -2414,6 +2480,15 @@
         navBtn.classList.add('active');
       } else if (tab === 'data') {
         document.getElementById('btn-header-data').classList.add('active');
+      }
+
+      if (tab === 'leasing') {
+        const currentOdo = getCurrentOdometer();
+        const limit = Number(appState.leasing.annualLimit) || 25000;
+        const startOdo = Number(appState.leasing.startOdo) || 0;
+        const driven = Math.max(0, currentOdo - startOdo);
+        const remaining = Math.max(0, limit - driven);
+        animateLeasingCounter(remaining);
       }
 
       const mainEl = document.getElementById('main-scroll-area');
