@@ -1895,19 +1895,24 @@
             <input type="number" id="cupra-stat-ev" step="0.1" placeholder="Ej. 11.2" />
           </div>
           <div class="form-group">
-            <label>Distancia recorrida (km)</label>
-            <input type="number" id="cupra-stat-km" step="1" placeholder="Ej. 767" />
+            <label>Distancia del mes (km)</label>
+            <input type="number" id="cupra-stat-km" step="1" placeholder="Ej. 767" oninput="recalcCupraOdoFromDistance()" />
+          </div>
+          <div class="form-group">
+            <label>Odómetro cierre (km)</label>
+            <input type="number" id="cupra-stat-end-odo" step="1" placeholder="Automático" oninput="this.dataset.manual='1'" />
           </div>
           <div class="form-group">
             <label>Velocidad media (km/h)</label>
             <input type="number" id="cupra-stat-speed" step="0.1" placeholder="Ej. 43.5" />
           </div>
-          <div class="form-group full">
+          <div class="form-group">
             <label>Duración del viaje</label>
             <input type="text" id="cupra-stat-duration" placeholder="Ej. 17 h 39 min" />
           </div>
         </div>
-        <button type="submit" class="btn-submit">Guardar Datos del Mes</button>
+        <div class="bono-helper-box" id="cupra-odo-calc-hint" style="margin-bottom: 10px;"></div>
+        <button type="submit" class="btn-submit">Guardar Datos y Actualizar Leasing</button>
       </form>
     </div>
   </div>
@@ -2078,7 +2083,33 @@
 
     function getCurrentOdometer() {
       const maxEntryOdo = appState.entries.reduce((max, e) => Math.max(max, Number(e.odo) || 0), 0);
-      return Math.max(maxEntryOdo, Number(appState.manualOdo) || 0);
+      const maxCupraOdo = Object.values(appState.cupraMonthly || {}).reduce((max, c) => Math.max(max, Number(c.endOdo) || 0), 0);
+      return Math.max(maxEntryOdo, maxCupraOdo, Number(appState.manualOdo) || 0);
+    }
+
+    function getBaseOdoForMonth(ym) {
+      const priorEntries = appState.entries.filter(e => e.date && e.date.slice(0, 7) < ym);
+      const maxPriorEntryOdo = priorEntries.reduce((max, e) => Math.max(max, Number(e.odo) || 0), 0);
+
+      let maxPriorCupraOdo = 0;
+      Object.entries(appState.cupraMonthly || {}).forEach(([mKey, val]) => {
+        if (mKey < ym && val && Number(val.endOdo) > 0) {
+          maxPriorCupraOdo = Math.max(maxPriorCupraOdo, Number(val.endOdo));
+        }
+      });
+
+      const priorOdo = Math.max(maxPriorEntryOdo, maxPriorCupraOdo);
+      if (priorOdo > 0) return priorOdo;
+
+      const leasingStart = Number(appState.leasing.startOdo) || 0;
+      if (leasingStart > 0) return leasingStart;
+
+      const monthEntries = appState.entries.filter(e => e.date && e.date.startsWith(ym) && Number(e.odo) > 0);
+      if (monthEntries.length > 0) {
+        return monthEntries.reduce((min, e) => Math.min(min, Number(e.odo)), Infinity);
+      }
+
+      return Number(appState.manualOdo) || 0;
     }
 
     const fmtEur = (n) => n.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
@@ -2282,7 +2313,7 @@
           <div style="text-align:center; padding: 8px 4px;">
             <p style="font-size:12.5px; color:var(--text-muted); line-height:1.45; margin-bottom:10px;">
               Sin lectura de <strong>My CUPRA</strong> para <strong>${monthLabel}</strong>.<br>
-              Sube una captura de <em>Datos mensuales</em> para registrar los km exactos, consumo combinado y horas al volante.
+              Sube una captura de <em>Datos mensuales</em> para registrar los km exactos, actualizar el odómetro y restarlos del Leasing automáticamente.
             </p>
             <button type="button" class="btn-secondary" style="margin-bottom:0;" onclick="openCupraStatsModal()">
               📷 Subir captura My CUPRA (${monthLabel})
@@ -2297,10 +2328,13 @@
       const distTxt = Number(data.distanceKm) > 0 ? `${Number(data.distanceKm).toLocaleString('es-ES')} km` : '--';
       const speedTxt = data.avgSpeed !== '' && data.avgSpeed !== undefined ? `${fmtNum(Number(data.avgSpeed), 1)} km/h` : '--';
       const durTxt = data.duration ? data.duration : '--';
+      const endOdoBadge = Number(data.endOdo) > 0
+        ? `<span class="mini-badge bono" style="margin-left:6px;">Odómetro: ${Number(data.endOdo).toLocaleString('es-ES')} km</span>`
+        : '';
 
       container.innerHTML = `
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; font-size:12px; color:var(--text-muted);">
-          <span>Resumen oficial · <strong style="color:#FFFFFF;">${monthLabel}</strong></span>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; font-size:12px; color:var(--text-muted); flex-wrap:wrap; gap:6px;">
+          <span>Resumen · <strong style="color:#FFFFFF;">${monthLabel}</strong>${endOdoBadge}</span>
           <div style="display:flex; gap:10px;">
             <button type="button" class="tx-btn" onclick="openCupraStatsModal()">Editar</button>
             <button type="button" class="tx-btn del" onclick="deleteCupraMonthlyStats('${targetYm}')">Borrar</button>
@@ -2316,7 +2350,7 @@
             <div class="ct-val" style="color:var(--bbva-cyan);">${evTxt}</div>
           </div>
           <div class="ct-box">
-            <div class="ct-lbl">🛣️ Distancia recorrida</div>
+            <div class="ct-lbl">🛣️ Distancia del mes</div>
             <div class="ct-val">${distTxt}</div>
           </div>
           <div class="ct-box">
@@ -3166,7 +3200,7 @@
     }
 
     // =========================================================================
-    // IMPORTACIÓN Y LECTURA AUTOMÁTICA DE CAPTURA MY CUPRA (DATOS MENSUALES)
+    // IMPORTACIÓN Y CÁLCULO AUTOMÁTICO DE ODÓMETRO/LEASING DESDE MY CUPRA
     // =========================================================================
     function openCupraStatsModal() {
       const selectedMonth = document.getElementById('month-picker').value || new Date().toISOString().slice(0, 7);
@@ -3180,17 +3214,57 @@
     function loadCupraMonthIntoForm() {
       const ym = document.getElementById('cupra-stat-month').value;
       const existing = appState.cupraMonthly[ym] || {};
+      const endOdoInput = document.getElementById('cupra-stat-end-odo');
+      delete endOdoInput.dataset.manual;
+
       document.getElementById('cupra-stat-fuel').value = existing.fuelL100 ?? '';
       document.getElementById('cupra-stat-ev').value = existing.evKwh100 ?? '';
       document.getElementById('cupra-stat-km').value = existing.distanceKm ?? '';
       document.getElementById('cupra-stat-speed').value = existing.avgSpeed ?? '';
       document.getElementById('cupra-stat-duration').value = existing.duration ?? '';
+
+      if (existing.endOdo !== undefined && existing.endOdo !== '') {
+        endOdoInput.value = existing.endOdo;
+        updateCupraOdoHint(ym, Number(existing.distanceKm) || 0, Number(existing.endOdo));
+      } else {
+        endOdoInput.value = '';
+        recalcCupraOdoFromDistance();
+      }
+    }
+
+    function updateCupraOdoHint(ym, distKm, computedEndOdo) {
+      const hintEl = document.getElementById('cupra-odo-calc-hint');
+      if (!hintEl) return;
+      const baseOdo = getBaseOdoForMonth(ym);
+      if (distKm > 0) {
+        hintEl.innerHTML = `🔄 <strong>Cálculo automático Leasing:</strong> Base inicio de mes (<strong>${baseOdo.toLocaleString('es-ES')} km</strong>) + <strong>${distKm.toLocaleString('es-ES')} km</strong> = <strong>${computedEndOdo.toLocaleString('es-ES')} km</strong> en odómetro.`;
+      } else {
+        hintEl.innerHTML = `ℹ️ Base de inicio detectada para este mes: <strong>${baseOdo.toLocaleString('es-ES')} km</strong>. Al leer los km recorridos se sumarán automáticamente al odómetro y al Leasing.`;
+      }
+    }
+
+    function recalcCupraOdoFromDistance() {
+      const ym = document.getElementById('cupra-stat-month').value;
+      const distKm = parseInt(document.getElementById('cupra-stat-km').value, 10) || 0;
+      const baseOdo = getBaseOdoForMonth(ym);
+      const endOdoInput = document.getElementById('cupra-stat-end-odo');
+
+      if (!endOdoInput.dataset.manual) {
+        if (distKm > 0) {
+          const calcOdo = baseOdo + distKm;
+          endOdoInput.value = calcOdo;
+          updateCupraOdoHint(ym, distKm, calcOdo);
+        } else {
+          endOdoInput.value = '';
+          updateCupraOdoHint(ym, 0, baseOdo);
+        }
+      }
     }
 
     function parseCupraScreenshotText(rawText) {
       const notes = [];
 
-      // 1. Consumo medio de combustible (ej. "2,1 l/100 km" — OCR suele leer "l" como "1" o "I")
+      // 1. Consumo medio de combustible (ej. "2,1 l/100 km")
       const fuelMatch = rawText.match(/(?:combustible[\s\S]{0,35}?)(\d{1,2}[.,]\d{1,2})\s*(?:l|1|i|L)\s*\/\s*100/i)
         || rawText.match(/(\d{1,2}[.,]\d{1,2})\s*(?:l|1|i|L)\s*\/\s*100\s*km/i);
       if (fuelMatch) {
@@ -3225,8 +3299,12 @@
       if (distMatch) {
         const distVal = parseInt(distMatch[1], 10);
         if (!isNaN(distVal) && distVal > 0 && distVal <= 30000) {
+          const endOdoInput = document.getElementById('cupra-stat-end-odo');
+          delete endOdoInput.dataset.manual;
           document.getElementById('cupra-stat-km').value = distVal;
-          notes.push(`${distVal.toLocaleString('es-ES')} km`);
+          recalcCupraOdoFromDistance();
+          const newOdo = Number(endOdoInput.value) || 0;
+          notes.push(`${distVal.toLocaleString('es-ES')} km (Odómetro → ${newOdo.toLocaleString('es-ES')} km)`);
         }
       }
 
@@ -3260,7 +3338,7 @@
 
         if (notes.length > 0) {
           statusEl.className = 'scan-status ok';
-          statusEl.innerHTML = `✅ <strong>Captura leída:</strong> ${notes.join(' · ')}<br><span style="opacity:0.85;">Comprueba el mes y pulsa <strong>Guardar Datos del Mes</strong>.</span>`;
+          statusEl.innerHTML = `✅ <strong>Captura leída:</strong> ${notes.join(' · ')}<br><span style="opacity:0.85;">Pulsa <strong>Guardar Datos y Actualizar Leasing</strong> para aplicarlo.</span>`;
         } else {
           statusEl.className = 'scan-status warn';
           statusEl.innerHTML = '⚠️ No se pudieron leer los datos de la captura. Puedes introducirlos manualmente en los campos de abajo.';
@@ -3282,6 +3360,7 @@
       const fuelRaw = document.getElementById('cupra-stat-fuel').value;
       const evRaw = document.getElementById('cupra-stat-ev').value;
       const kmRaw = document.getElementById('cupra-stat-km').value;
+      const endOdoRaw = document.getElementById('cupra-stat-end-odo').value;
       const speedRaw = document.getElementById('cupra-stat-speed').value;
       const durationRaw = document.getElementById('cupra-stat-duration').value.trim();
 
@@ -3289,6 +3368,7 @@
         fuelL100: fuelRaw !== '' ? parseFloat(fuelRaw) : '',
         evKwh100: evRaw !== '' ? parseFloat(evRaw) : '',
         distanceKm: kmRaw !== '' ? parseInt(kmRaw, 10) : '',
+        endOdo: endOdoRaw !== '' ? parseInt(endOdoRaw, 10) : '',
         avgSpeed: speedRaw !== '' ? parseFloat(speedRaw) : '',
         duration: durationRaw
       };
@@ -3644,6 +3724,7 @@
         fuelL100: 2.1,
         evKwh100: 11.2,
         distanceKm: 767,
+        endOdo: 4867,
         avgSpeed: 43.5,
         duration: '17 h 39 min'
       };
