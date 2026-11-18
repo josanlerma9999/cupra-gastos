@@ -900,7 +900,7 @@
       text-align: center;
     }
 
-    /* LEASING TRACKER CON CAJAS SUPERIORES AMPLIADAS Y ALERTAS DE COLOR */
+    /* LEASING TRACKER CON CAJAS FIJAS EN UNA LÍNEA (SIN SALTO DE ALTURA) */
     #view-leasing.active {
       flex: 1;
       display: flex;
@@ -931,7 +931,8 @@
 
     .leasing-stat-box {
       background: var(--card-inset);
-      padding: 22px 10px;
+      padding: 16px 8px;
+      height: 102px;
       border-radius: var(--radius-lg);
       border: 1px solid var(--border-subtle);
       text-align: center;
@@ -939,25 +940,29 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
+      overflow: hidden;
       transition: background 0.25s ease, border-color 0.25s ease;
     }
 
     .leasing-stat-box .lbl {
-      font-size: 12px;
+      font-size: 11.5px;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.4px;
       color: var(--text-muted);
+      white-space: nowrap;
     }
 
     .leasing-stat-box .val {
-      font-size: 30px;
+      font-size: clamp(20px, 5.8vw, 26px);
       font-weight: 800;
       color: #FFFFFF;
       margin-top: 6px;
-      line-height: 1.1;
-      letter-spacing: -0.5px;
+      line-height: 1.15;
+      letter-spacing: -0.4px;
+      white-space: nowrap;
       font-variant-numeric: tabular-nums;
+      transition: color 0.25s ease;
     }
 
     /* Estados de color para KM Disponibles (>5000 cian, <=5000 ámbar, <=2000 rojo) */
@@ -1175,7 +1180,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
       padding-bottom: 10px;
       border-bottom: 1px solid var(--border-subtle);
     }
@@ -1194,6 +1199,60 @@
       font-size: 18px;
       cursor: pointer;
       color: var(--bbva-cyan);
+    }
+
+    /* ESCÁNER DE TICKETS AUTOMÁTICO */
+    .ticket-scan-bar {
+      margin-bottom: 14px;
+    }
+
+    .btn-scan-ticket {
+      width: 100%;
+      padding: 12px 14px;
+      background: linear-gradient(135deg, rgba(45, 204, 205, 0.16) 0%, rgba(0, 68, 129, 0.32) 100%);
+      border: 1px dashed rgba(45, 204, 205, 0.65);
+      border-radius: 12px;
+      color: var(--bbva-cyan);
+      font-size: 13.5px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: transform 0.12s ease, background 0.15s ease;
+    }
+
+    .btn-scan-ticket:active {
+      transform: scale(0.985);
+    }
+
+    .btn-scan-ticket:disabled {
+      opacity: 0.65;
+      cursor: wait;
+    }
+
+    .scan-status {
+      margin-top: 8px;
+      padding: 9px 11px;
+      border-radius: 10px;
+      font-size: 12px;
+      line-height: 1.4;
+      background: var(--card-inset);
+      border: 1px solid var(--border-light);
+      color: #E2E8F0;
+    }
+
+    .scan-status.ok {
+      border-color: rgba(52, 211, 153, 0.45);
+      background: rgba(52, 211, 153, 0.12);
+      color: #A7F3D0;
+    }
+
+    .scan-status.warn {
+      border-color: rgba(245, 158, 11, 0.45);
+      background: var(--fuel-amber-soft);
+      color: #FDE68A;
     }
 
     .form-grid {
@@ -1637,6 +1696,17 @@
         <h3 id="modal-title">Nuevo Registro</h3>
         <button class="close-btn" onclick="closeModal('entry-modal')">×</button>
       </div>
+
+      <!-- LECTURA AUTOMÁTICA DE TICKET -->
+      <div class="ticket-scan-bar">
+        <input type="file" id="ticket-file-input" accept="image/*" style="display:none" onchange="handleTicketUpload(event)" />
+        <button type="button" class="btn-scan-ticket" id="btn-scan-ticket" onclick="document.getElementById('ticket-file-input').click()">
+          <span>📷</span>
+          <span>Leer ticket automáticamente (Foto / Galería)</span>
+        </button>
+        <div class="scan-status" id="ticket-scan-status" style="display:none;"></div>
+      </div>
+
       <form id="entry-form" onsubmit="saveEntry(event)">
         <input type="hidden" id="entry-id" />
         <input type="hidden" id="entry-type" />
@@ -2253,38 +2323,56 @@
       `;
     }
 
-    // ANIMACIÓN CONTADOR DE 0 HASTA KM DISPONIBLES
+    // APLICAR COLOR DINÁMICO SEGÚN VALOR ACTUAL (<=2000 ROJO, <=5000 ÁMBAR, >5000 CIAN)
+    function applyLeasingBoxColor(boxEl, value) {
+      if (!boxEl) return;
+      boxEl.classList.remove('avail-ok', 'avail-warn', 'avail-danger');
+      if (value <= 2000) {
+        boxEl.classList.add('avail-danger');
+      } else if (value <= 5000) {
+        boxEl.classList.add('avail-warn');
+      } else {
+        boxEl.classList.add('avail-ok');
+      }
+    }
+
+    // ANIMACIÓN CONTADOR PAUSADA (2.4s) DE 0 HASTA KM DISPONIBLES CON CAMBIO DE COLOR
     let leasingAnimFrame = null;
     function animateLeasingCounter(target) {
       const el = document.getElementById('leasing-avail-val');
+      const boxEl = document.getElementById('leasing-avail-box');
       if (!el) return;
       if (leasingAnimFrame) cancelAnimationFrame(leasingAnimFrame);
 
       const endVal = Math.max(0, Math.round(target));
       if (endVal === 0) {
         el.textContent = '0 km';
+        applyLeasingBoxColor(boxEl, 0);
         return;
       }
 
-      const duration = 750;
+      const duration = 2400;
       const startTime = performance.now();
 
       function step(now) {
         const elapsed = now - startTime;
         const progress = Math.min(1, elapsed / duration);
-        const eased = 1 - Math.pow(1 - progress, 3);
+        const eased = 1 - Math.pow(1 - progress, 2.2);
         const current = Math.round(eased * endVal);
         el.textContent = current.toLocaleString('es-ES') + ' km';
+        applyLeasingBoxColor(boxEl, current);
 
         if (progress < 1) {
           leasingAnimFrame = requestAnimationFrame(step);
         } else {
           el.textContent = endVal.toLocaleString('es-ES') + ' km';
+          applyLeasingBoxColor(boxEl, endVal);
           leasingAnimFrame = null;
         }
       }
 
       el.textContent = '0 km';
+      applyLeasingBoxColor(boxEl, 0);
       leasingAnimFrame = requestAnimationFrame(step);
     }
 
@@ -2298,14 +2386,10 @@
       const excess = Math.max(0, driven - limit);
       const pct = Math.min(100, Math.round((driven / limit) * 100));
 
-      // Color de alerta según km disponibles: >5000 cian, <=5000 ámbar, <=2000 rojo
-      let availBoxClass = 'avail-ok';
       let fillClass = '';
       if (remaining <= 2000) {
-        availBoxClass = 'avail-danger';
         fillClass = 'danger';
       } else if (remaining <= 5000) {
-        availBoxClass = 'avail-warn';
         fillClass = 'warn';
       }
 
@@ -2358,7 +2442,7 @@
                 <div class="lbl">Km Consumidos</div>
                 <div class="val">${driven.toLocaleString('es-ES')} km</div>
               </div>
-              <div class="leasing-stat-box ${availBoxClass}">
+              <div class="leasing-stat-box avail-danger" id="leasing-avail-box">
                 <div class="lbl">Km Disponibles</div>
                 <div class="val" id="leasing-avail-val">0 km</div>
               </div>
@@ -2550,11 +2634,349 @@
       renderAll();
     }
 
+    // =========================================================================
+    // ESCÁNER AUTOMÁTICO DE TICKETS (OCR EN ESPAÑOL + PREPROCESADO DE IMAGEN)
+    // =========================================================================
+    let ocrWorkerInstance = null;
+
+    function loadTesseractScript() {
+      return new Promise((resolve, reject) => {
+        if (window.Tesseract) return resolve(window.Tesseract);
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
+        script.onload = () => resolve(window.Tesseract);
+        script.onerror = () => reject(new Error('No se pudo descargar el lector OCR (verifica tu conexión a internet).'));
+        document.head.appendChild(script);
+      });
+    }
+
+    function preprocessTicketImage(file) {
+      return new Promise((resolve, reject) => {
+        const url = URL.createObjectURL(file);
+        const img = new Image();
+        img.onload = () => {
+          URL.revokeObjectURL(url);
+          const maxDim = 1600;
+          let w = img.width;
+          let h = img.height;
+          if (Math.max(w, h) > maxDim) {
+            const scale = maxDim / Math.max(w, h);
+            w = Math.round(w * scale);
+            h = Math.round(h * scale);
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+
+          // Escala de grises + mejora de contraste para tickets térmicos
+          const imgData = ctx.getImageData(0, 0, w, h);
+          const d = imgData.data;
+          const contrast = 1.45;
+          const intercept = 128 * (1 - contrast);
+          for (let i = 0; i < d.length; i += 4) {
+            const gray = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
+            const adj = Math.min(255, Math.max(0, gray * contrast + intercept));
+            d[i] = d[i + 1] = d[i + 2] = adj;
+          }
+          ctx.putImageData(imgData, 0, 0);
+          resolve(canvas);
+        };
+        img.onerror = () => {
+          URL.revokeObjectURL(url);
+          reject(new Error('No se pudo procesar la imagen seleccionada.'));
+        };
+        img.src = url;
+      });
+    }
+
+    function parseSpanishNumber(raw) {
+      if (!raw) return NaN;
+      let cleaned = String(raw).trim().replace(/\s+/g, '');
+      // Si tiene coma y punto, tomar el último como decimal
+      if (cleaned.includes(',') && cleaned.includes('.')) {
+        if (cleaned.lastIndexOf(',') > cleaned.lastIndexOf('.')) {
+          cleaned = cleaned.replace(/\./g, '').replace(',', '.');
+        } else {
+          cleaned = cleaned.replace(/,/g, '');
+        }
+      } else {
+        cleaned = cleaned.replace(',', '.');
+      }
+      return parseFloat(cleaned);
+    }
+
+    function detectPlaceFromText(upperText, type) {
+      const gasBrands = [
+        { keys: ['ESCLATOIL', 'ESCLAT OIL', 'ESCLAT', 'BONPREU'], label: 'EsclatOil' },
+        { keys: ['REPSOL', 'WAYLET', 'CAMPSA', 'PETRONOR'], label: 'Repsol (Waylet)' },
+        { keys: ['BONAREA', 'BON AREA', 'BONÀREA'], label: 'BonÀrea' },
+        { keys: ['MOEVE', 'CEPSA'], label: 'Moeve / Cepsa' },
+        { keys: ['GALP'], label: 'Galp' },
+        { keys: ['SHELL'], label: 'Shell' },
+        { keys: ['BP ', 'BP OIL', 'ESTACION BP'], label: 'BP' },
+        { keys: ['BALLENOIL'], label: 'Ballenoil' },
+        { keys: ['PLENOIL'], label: 'Plenoil' },
+        { keys: ['PETROPRIX'], label: 'Petroprix' },
+        { keys: ['ALCAMPO'], label: 'Alcampo' },
+        { keys: ['CARREFOUR'], label: 'Carrefour' },
+        { keys: ['COSTCO'], label: 'Costco' }
+      ];
+
+      const evBrands = [
+        { keys: ['REPSOL', 'WAYLET'], label: 'Repsol (Waylet)' },
+        { keys: ['IBERDROLA'], label: 'Iberdrola' },
+        { keys: ['ENDESA'], label: 'Endesa X' },
+        { keys: ['ZUNDER'], label: 'Zunder' },
+        { keys: ['WENEA'], label: 'Wenea' },
+        { keys: ['IONITY'], label: 'Ionity' },
+        { keys: ['TESLA'], label: 'Tesla Supercharger' },
+        { keys: ['ELECTRA'], label: 'Electra' },
+        { keys: ['ACCIONA'], label: 'Acciona' },
+        { keys: ['MERCADONA'], label: 'Mercadona' }
+      ];
+
+      const list = type === 'gas' ? gasBrands : evBrands;
+      for (const item of list) {
+        if (item.keys.some(k => upperText.includes(k))) {
+          return item.label;
+        }
+      }
+      return null;
+    }
+
+    function extractDateFromText(text) {
+      // Busca formatos DD/MM/YYYY, DD-MM-YYYY, DD.MM.YYYY o DD/MM/YY
+      const m = text.match(/\b(0?[1-9]|[12]\d|3[01])[\/\-\.](0?[1-9]|1[0-2])[\/\-\.](20\d{2}|\d{2})\b/);
+      if (m) {
+        const day = m[1].padStart(2, '0');
+        const month = m[2].padStart(2, '0');
+        let year = m[3];
+        if (year.length === 2) year = '20' + year;
+        const yNum = Number(year);
+        if (yNum >= 2020 && yNum <= 2035) {
+          return `${year}-${month}-${day}`;
+        }
+      }
+      // Formato ISO YYYY-MM-DD
+      const iso = text.match(/\b(20\d{2})[\/\-](0[1-9]|1[0-2])[\/\-](0[1-9]|[12]\d|3[01])\b/);
+      if (iso) {
+        return `${iso[1]}-${iso[2]}-${iso[3]}`;
+      }
+      return null;
+    }
+
+    function applyParsedTicketData(rawText) {
+      const type = document.getElementById('entry-type').value;
+      const upper = rawText.toUpperCase();
+      const detectedNotes = [];
+
+      // 1. Fecha
+      const foundDate = extractDateFromText(rawText);
+      if (foundDate) {
+        document.getElementById('entry-date').value = foundDate;
+        detectedNotes.push(`Fecha: ${formatDateES(foundDate)}`);
+      }
+
+      // 2. Establecimiento / Punto de recarga
+      const foundPlace = detectPlaceFromText(upper, type);
+      if (foundPlace) {
+        if (type === 'gas') {
+          document.getElementById('entry-station').value = foundPlace;
+        } else {
+          document.getElementById('entry-charger').value = foundPlace;
+          if (foundPlace === 'Repsol (Waylet)' && appState.waylet.active) {
+            document.getElementById('entry-use-bono').checked = true;
+          }
+        }
+        detectedNotes.push(`Lugar: ${foundPlace}`);
+      }
+
+      if (type === 'gas') {
+        let liters = NaN;
+        let unitPrice = NaN;
+        let total = NaN;
+
+        // Litros por palabra clave o unidad L / LTR
+        const litRegexes = [
+          /(?:LITROS|LTR|CANTIDAD|CANT\.?|VOLUMEN|VOL\.?)\s*[:=\-]?\s*(\d{1,3}[.,]\d{1,3})/i,
+          /(\d{1,3}[.,]\d{2,3})\s*(?:L|LTR|LITROS)\b/i
+        ];
+        for (const rx of litRegexes) {
+          const m = rawText.match(rx);
+          if (m) {
+            const val = parseSpanishNumber(m[1]);
+            if (val > 0.5 && val <= 90) { liters = val; break; }
+          }
+        }
+
+        // Precio €/L (3 decimales típicos en España, ej. 1,489)
+        const priceRegexes = [
+          /(?:PRECIO|P\.?\s*UNIT|PVP|EUR\/L|€\/L)\s*[:=\-]?\s*(\d[.,]\d{2,3})/i,
+          /(\d[.,]\d{3})\s*(?:€\/L|EUR\/L|€|EUR)?/i
+        ];
+        for (const rx of priceRegexes) {
+          const m = rawText.match(rx);
+          if (m) {
+            const val = parseSpanishNumber(m[1]);
+            if (val >= 0.85 && val <= 2.8) { unitPrice = val; break; }
+          }
+        }
+
+        // Importe Total (€)
+        const totalRegexes = [
+          /(?:TOTAL(?:\s+A\s+PAGAR|\s+EUR|\s+€)?|IMPORTE(?:\s+TOTAL)?|A\s+PAGAR|TARJETA|VISA|MASTERCARD)\s*[:=\-]?\s*(\d{1,3}[.,]\d{2})/i,
+          /(\d{1,3}[.,]\d{2})\s*(?:€|EUR)\b/i
+        ];
+        for (const rx of totalRegexes) {
+          const m = rawText.match(rx);
+          if (m) {
+            const val = parseSpanishNumber(m[1]);
+            if (val > 1 && val <= 250) { total = val; break; }
+          }
+        }
+
+        // Reconciliación matemática si faltó uno de los 3 datos
+        if (!isNaN(liters) && !isNaN(unitPrice) && isNaN(total)) {
+          total = +(liters * unitPrice).toFixed(2);
+        } else if (!isNaN(total) && !isNaN(unitPrice) && isNaN(liters)) {
+          liters = +(total / unitPrice).toFixed(2);
+        } else if (!isNaN(total) && !isNaN(liters) && isNaN(unitPrice)) {
+          unitPrice = +(total / liters).toFixed(3);
+        }
+
+        if (!isNaN(liters)) {
+          document.getElementById('entry-qty').value = liters.toFixed(2);
+          detectedNotes.push(`${fmtNum(liters, 2)} L`);
+        }
+        if (!isNaN(unitPrice)) {
+          document.getElementById('entry-unit-price').value = unitPrice.toFixed(3);
+          detectedNotes.push(`${fmtNum(unitPrice, 3)} €/L`);
+        }
+        if (!isNaN(total)) {
+          document.getElementById('entry-total').value = total.toFixed(2);
+          detectedNotes.push(`Total: ${fmtEur(total)}`);
+        }
+      } else {
+        // RECARGA ELÉCTRICA (kWh, tarifa, total)
+        let kwh = NaN;
+        let rate = NaN;
+        let total = NaN;
+
+        const kwhRegexes = [
+          /(\d{1,3}[.,]\d{1,3})\s*(?:KWH|KW\/H)\b/i,
+          /(?:ENERG[IÍ]A|CONSUMO|CARGA)\s*[:=\-]?\s*(\d{1,3}[.,]\d{1,3})/i
+        ];
+        for (const rx of kwhRegexes) {
+          const m = rawText.match(rx);
+          if (m) {
+            const val = parseSpanishNumber(m[1]);
+            if (val > 0.1 && val <= 100) { kwh = val; break; }
+          }
+        }
+
+        const rateRegexes = [
+          /(\d[.,]\d{2,3})\s*(?:€\/KWH|EUR\/KWH)/i,
+          /(?:TARIFA|PRECIO)\s*[:=\-]?\s*(\d[.,]\d{2,3})/i
+        ];
+        for (const rx of rateRegexes) {
+          const m = rawText.match(rx);
+          if (m) {
+            const val = parseSpanishNumber(m[1]);
+            if (val >= 0.05 && val <= 1.5) { rate = val; break; }
+          }
+        }
+
+        const totalRegexes = [
+          /(?:TOTAL(?:\s+A\s+PAGAR|\s+EUR|\s+€)?|IMPORTE(?:\s+TOTAL)?|COSTE|A\s+PAGAR)\s*[:=\-]?\s*(\d{1,3}[.,]\d{2})/i,
+          /(\d{1,3}[.,]\d{2})\s*(?:€|EUR)\b/i
+        ];
+        for (const rx of totalRegexes) {
+          const m = rawText.match(rx);
+          if (m) {
+            const val = parseSpanishNumber(m[1]);
+            if (val >= 0 && val <= 150) { total = val; break; }
+          }
+        }
+
+        if (!isNaN(kwh)) {
+          document.getElementById('entry-qty').value = kwh.toFixed(2);
+          detectedNotes.push(`${fmtNum(kwh, 2)} kWh`);
+        }
+        if (!isNaN(rate)) {
+          document.getElementById('entry-unit-price').value = rate.toFixed(3);
+          detectedNotes.push(`${fmtNum(rate, 3)} €/kWh`);
+        }
+        if (!isNaN(total)) {
+          document.getElementById('entry-total').value = total.toFixed(2);
+          detectedNotes.push(`Importe: ${fmtEur(total)}`);
+        }
+
+        recalcEvBonoPreview();
+      }
+
+      return detectedNotes;
+    }
+
+    async function handleTicketUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const btn = document.getElementById('btn-scan-ticket');
+      const statusEl = document.getElementById('ticket-scan-status');
+      btn.disabled = true;
+      statusEl.style.display = 'block';
+      statusEl.className = 'scan-status';
+      statusEl.innerHTML = '⏳ Mejorando contraste de la imagen del ticket...';
+
+      try {
+        const processedCanvas = await preprocessTicketImage(file);
+        statusEl.innerHTML = '⏳ Cargando lector OCR en español...';
+        const TesseractLib = await loadTesseractScript();
+
+        if (!ocrWorkerInstance) {
+          ocrWorkerInstance = await TesseractLib.createWorker('spa', 1, {
+            logger: (m) => {
+              if (m.status === 'recognizing text') {
+                const pct = Math.round((m.progress || 0) * 100);
+                statusEl.innerHTML = `🔍 Leyendo datos del ticket... <strong>${pct}%</strong>`;
+              }
+            }
+          });
+        } else {
+          statusEl.innerHTML = '🔍 Leyendo datos del ticket...';
+        }
+
+        const { data } = await ocrWorkerInstance.recognize(processedCanvas);
+        const notes = applyParsedTicketData(data.text || '');
+
+        if (notes.length > 0) {
+          statusEl.className = 'scan-status ok';
+          statusEl.innerHTML = `✅ <strong>Ticket leído:</strong> ${notes.join(' · ')}<br><span style="opacity:0.85;">Revisa los datos y actualiza el odómetro si es necesario.</span>`;
+        } else {
+          statusEl.className = 'scan-status warn';
+          statusEl.innerHTML = '⚠️ No se pudieron detectar cifras claras en la foto. Intenta enfocar mejor el ticket o rellena los campos manualmente.';
+        }
+      } catch (err) {
+        statusEl.className = 'scan-status warn';
+        statusEl.innerHTML = `⚠️ ${err.message || 'Error al leer el ticket.'}`;
+      } finally {
+        btn.disabled = false;
+        event.target.value = '';
+      }
+    }
+
     // MODALES Y FORMULARIOS
     function openEntryModal(type, existing = null) {
       document.getElementById('entry-form').reset();
       document.getElementById('entry-id').value = existing ? existing.id : '';
       document.getElementById('entry-type').value = type;
+
+      const ticketInput = document.getElementById('ticket-file-input');
+      const statusEl = document.getElementById('ticket-scan-status');
+      if (ticketInput) ticketInput.value = '';
+      if (statusEl) statusEl.style.display = 'none';
 
       const isGas = type === 'gas';
       document.getElementById('modal-title').textContent = existing
