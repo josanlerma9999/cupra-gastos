@@ -432,6 +432,59 @@
       margin-top: 3px;
     }
 
+    /* TELEMETRÍA MY CUPRA EN ANÁLISIS */
+    .cupra-telemetry-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 9px;
+    }
+
+    .ct-box {
+      background: var(--card-inset);
+      border: 1px solid var(--border-subtle);
+      border-radius: 11px;
+      padding: 10px 11px;
+    }
+
+    .ct-box.wide {
+      grid-column: 1 / -1;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .ct-lbl {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .ct-val {
+      font-size: 16px;
+      font-weight: 800;
+      color: #FFFFFF;
+      margin-top: 2px;
+    }
+
+    .ct-box.wide .ct-val {
+      margin-top: 0;
+      color: var(--bbva-cyan);
+    }
+
+    .btn-cupra-import {
+      background: rgba(45, 204, 205, 0.15);
+      border: 1px solid rgba(45, 204, 205, 0.42);
+      color: var(--bbva-cyan);
+      font-size: 12px;
+      font-weight: 700;
+      padding: 5px 10px;
+      border-radius: 999px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
     /* TARJETA BONO WAYLET */
     .bono-card {
       background: linear-gradient(135deg, #072146 0%, #0C3266 100%);
@@ -575,6 +628,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      gap: 8px;
     }
 
     .card {
@@ -1204,7 +1258,7 @@
       color: var(--bbva-cyan);
     }
 
-    /* ESCÁNER DE TICKETS AUTOMÁTICO */
+    /* ESCÁNER DE TICKETS Y CAPTURAS AUTOMÁTICO */
     .ticket-scan-bar {
       margin-bottom: 14px;
     }
@@ -1427,7 +1481,7 @@
           </div>
           <div class="km-badge">
             <div class="km-val" id="period-km">0 km</div>
-            <div class="km-sub">recorridos en periodo</div>
+            <div class="km-sub" id="period-km-sub">recorridos en periodo</div>
           </div>
         </div>
 
@@ -1518,6 +1572,16 @@
           </div>
         </div>
       </div>
+
+      <!-- DATOS MENSUALES APP MY CUPRA -->
+      <div class="section-title">
+        <span>Datos Mensuales · My CUPRA</span>
+        <button type="button" class="btn-cupra-import" onclick="openCupraStatsModal()">
+          <span>📷</span>
+          <span>Importar captura</span>
+        </button>
+      </div>
+      <div class="card" id="cupra-telemetry-card"></div>
 
       <div class="section-title">
         <span>Evolución últimos 6 meses</span>
@@ -1799,6 +1863,55 @@
     </div>
   </div>
 
+  <!-- MODAL IMPORTAR DATOS MENSUALES APP MY CUPRA -->
+  <div class="modal-backdrop" id="cupra-stats-modal">
+    <div class="modal-sheet">
+      <div class="modal-header">
+        <h3 id="cupra-modal-title">Datos Mensuales My CUPRA</h3>
+        <button class="close-btn" onclick="closeModal('cupra-stats-modal')">×</button>
+      </div>
+
+      <div class="ticket-scan-bar">
+        <input type="file" id="cupra-file-input" accept="image/*" style="display:none" onchange="handleCupraScreenshotUpload(event)" />
+        <button type="button" class="btn-scan-ticket" id="btn-scan-cupra" onclick="document.getElementById('cupra-file-input').click()">
+          <span>📷</span>
+          <span>Leer captura de My CUPRA automáticamente</span>
+        </button>
+        <div class="scan-status" id="cupra-scan-status" style="display:none;"></div>
+      </div>
+
+      <form onsubmit="saveCupraMonthlyStats(event)">
+        <div class="form-grid">
+          <div class="form-group full">
+            <label>Mes correspondiente</label>
+            <input type="month" id="cupra-stat-month" required onchange="loadCupraMonthIntoForm()" />
+          </div>
+          <div class="form-group">
+            <label>Combustible (L/100 km)</label>
+            <input type="number" id="cupra-stat-fuel" step="0.1" placeholder="Ej. 2.1" />
+          </div>
+          <div class="form-group">
+            <label>Energía (kWh/100 km)</label>
+            <input type="number" id="cupra-stat-ev" step="0.1" placeholder="Ej. 11.2" />
+          </div>
+          <div class="form-group">
+            <label>Distancia recorrida (km)</label>
+            <input type="number" id="cupra-stat-km" step="1" placeholder="Ej. 767" />
+          </div>
+          <div class="form-group">
+            <label>Velocidad media (km/h)</label>
+            <input type="number" id="cupra-stat-speed" step="0.1" placeholder="Ej. 43.5" />
+          </div>
+          <div class="form-group full">
+            <label>Duración del viaje</label>
+            <input type="text" id="cupra-stat-duration" placeholder="Ej. 17 h 39 min" />
+          </div>
+        </div>
+        <button type="submit" class="btn-submit">Guardar Datos del Mes</button>
+      </form>
+    </div>
+  </div>
+
   <!-- MODAL CONFIGURAR SUSCRIPCIÓN WAYLET -->
   <div class="modal-backdrop" id="waylet-modal">
     <div class="modal-sheet">
@@ -1921,6 +2034,7 @@
     let appState = {
       entries: [],
       manualOdo: 0,
+      cupraMonthly: {},
       leasing: {
         annualLimit: 25000,
         startOdo: 0,
@@ -1945,6 +2059,7 @@
           appState = {
             ...appState,
             ...parsed,
+            cupraMonthly: parsed.cupraMonthly || {},
             leasing: { ...appState.leasing, ...(parsed.leasing || {}) },
             waylet: { ...appState.waylet, ...(parsed.waylet || {}) }
           };
@@ -2033,6 +2148,7 @@
 
       const sorted = [...appState.entries].sort((a, b) => a.date.localeCompare(b.date) || a.odo - b.odo);
       const w = appState.waylet;
+      const cupraDataForMonth = (mode === 'month' && selectedMonth) ? (appState.cupraMonthly[selectedMonth] || null) : null;
 
       let filtered = sorted;
       let subscriptionCostInPeriod = 0;
@@ -2106,13 +2222,24 @@
         ? `<span style="color:#FBBF24;">Exceso: <strong>+${fmtNum(bonoStats.exceededKwh, 1)} kWh</strong></span>`
         : `Quedan: <strong>${fmtNum(bonoStats.remainingKwh, 1)} kWh</strong>`;
 
-      // Kilómetros del periodo
+      // Kilómetros del periodo (prioriza distancia exacta de My CUPRA si existe para el mes)
       let periodKm = 0;
-      if (filtered.length >= 2) {
-        periodKm = filtered[filtered.length - 1].odo - filtered[0].odo;
-      } else if (filtered.length === 1 && mode === 'month') {
-        const idx = sorted.findIndex(e => e.id === filtered[0].id);
-        if (idx > 0) periodKm = filtered[0].odo - sorted[idx - 1].odo;
+      const kmSubEl = document.getElementById('period-km-sub');
+      if (cupraDataForMonth && Number(cupraDataForMonth.distanceKm) > 0) {
+        periodKm = Number(cupraDataForMonth.distanceKm);
+        if (kmSubEl) kmSubEl.textContent = 'recorridos (My CUPRA)';
+      } else {
+        if (filtered.length >= 2) {
+          periodKm = filtered[filtered.length - 1].odo - filtered[0].odo;
+        } else if (filtered.length === 1 && mode === 'month') {
+          const idx = sorted.findIndex(e => e.id === filtered[0].id);
+          if (idx > 0) periodKm = filtered[0].odo - sorted[idx - 1].odo;
+        }
+        if (mode === 'all') {
+          const totalCupraKm = Object.values(appState.cupraMonthly).reduce((s, item) => s + (Number(item.distanceKm) || 0), 0);
+          if (totalCupraKm > periodKm) periodKm = totalCupraKm;
+        }
+        if (kmSubEl) kmSubEl.textContent = 'recorridos en periodo';
       }
       if (periodKm < 0) periodKm = 0;
 
@@ -2124,17 +2251,84 @@
       document.getElementById('kpi-charges-count').textContent = filtered.length;
 
       const realL100 = calcRealFuelConsumption(sorted);
-      document.getElementById('kpi-real-l100').textContent = realL100 !== null ? `${fmtNum(realL100, 2)} L/100` : '-- L/100';
+      if (cupraDataForMonth && Number(cupraDataForMonth.fuelL100) > 0) {
+        document.getElementById('kpi-real-l100').textContent = `${fmtNum(Number(cupraDataForMonth.fuelL100), 1)} L/100`;
+      } else {
+        document.getElementById('kpi-real-l100').textContent = realL100 !== null ? `${fmtNum(realL100, 2)} L/100` : '-- L/100';
+      }
 
       const refGasPrice = avgGasPrice > 0 ? avgGasPrice : 1.52;
       const equivalentThermalCost = (periodKm / 100) * 6.8 * refGasPrice;
       const savings = Math.max(0, equivalentThermalCost - grandTotal);
       document.getElementById('kpi-savings').textContent = fmtEur(savings);
 
+      renderCupraTelemetryCard(mode, selectedMonth);
       syncTripCalculatorDefaults(sorted);
       renderMonthlyChart(sorted);
       renderLists(sorted);
       renderLeasing(currentOdo);
+    }
+
+    function renderCupraTelemetryCard(mode, selectedMonth) {
+      const container = document.getElementById('cupra-telemetry-card');
+      if (!container) return;
+
+      const targetYm = selectedMonth || new Date().toISOString().slice(0, 7);
+      const data = appState.cupraMonthly[targetYm];
+      const monthLabel = formatFullMonthLabel(targetYm);
+
+      if (!data) {
+        container.innerHTML = `
+          <div style="text-align:center; padding: 8px 4px;">
+            <p style="font-size:12.5px; color:var(--text-muted); line-height:1.45; margin-bottom:10px;">
+              Sin lectura de <strong>My CUPRA</strong> para <strong>${monthLabel}</strong>.<br>
+              Sube una captura de <em>Datos mensuales</em> para registrar los km exactos, consumo combinado y horas al volante.
+            </p>
+            <button type="button" class="btn-secondary" style="margin-bottom:0;" onclick="openCupraStatsModal()">
+              📷 Subir captura My CUPRA (${monthLabel})
+            </button>
+          </div>
+        `;
+        return;
+      }
+
+      const fuelTxt = data.fuelL100 !== '' && data.fuelL100 !== undefined ? `${fmtNum(Number(data.fuelL100), 1)} L/100 km` : '--';
+      const evTxt = data.evKwh100 !== '' && data.evKwh100 !== undefined ? `${fmtNum(Number(data.evKwh100), 1)} kWh/100 km` : '--';
+      const distTxt = Number(data.distanceKm) > 0 ? `${Number(data.distanceKm).toLocaleString('es-ES')} km` : '--';
+      const speedTxt = data.avgSpeed !== '' && data.avgSpeed !== undefined ? `${fmtNum(Number(data.avgSpeed), 1)} km/h` : '--';
+      const durTxt = data.duration ? data.duration : '--';
+
+      container.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; font-size:12px; color:var(--text-muted);">
+          <span>Resumen oficial · <strong style="color:#FFFFFF;">${monthLabel}</strong></span>
+          <div style="display:flex; gap:10px;">
+            <button type="button" class="tx-btn" onclick="openCupraStatsModal()">Editar</button>
+            <button type="button" class="tx-btn del" onclick="deleteCupraMonthlyStats('${targetYm}')">Borrar</button>
+          </div>
+        </div>
+        <div class="cupra-telemetry-grid">
+          <div class="ct-box">
+            <div class="ct-lbl">⛽ Combustible medio</div>
+            <div class="ct-val" style="color:#FBBF24;">${fuelTxt}</div>
+          </div>
+          <div class="ct-box">
+            <div class="ct-lbl">⚡ Energía media</div>
+            <div class="ct-val" style="color:var(--bbva-cyan);">${evTxt}</div>
+          </div>
+          <div class="ct-box">
+            <div class="ct-lbl">🛣️ Distancia recorrida</div>
+            <div class="ct-val">${distTxt}</div>
+          </div>
+          <div class="ct-box">
+            <div class="ct-lbl">⏱️ Velocidad media</div>
+            <div class="ct-val">${speedTxt}</div>
+          </div>
+          <div class="ct-box wide">
+            <div class="ct-lbl">🕒 Duración total del viaje</div>
+            <div class="ct-val">${durTxt}</div>
+          </div>
+        </div>
+      `;
     }
 
     function calcRealFuelConsumption(sorted) {
@@ -2212,7 +2406,6 @@
         filteredHistory = desc.filter(e => e.type === historyFilter);
       }
 
-      // Actualizar barra de resumen dinámico del filtro
       const fCount = filteredHistory.length;
       const fLiters = filteredHistory.filter(e => e.type === 'gas').reduce((s, e) => s + (Number(e.qty) || 0), 0);
       const fKwh = filteredHistory.filter(e => e.type === 'ev').reduce((s, e) => s + (Number(e.qty) || 0), 0);
@@ -2238,7 +2431,6 @@
         ? filteredHistory.map(buildTxCard).join('')
         : `<div class="empty-state">No hay registros en esta categoría.</div>`;
 
-      // Desglose por Gasolinera / Punto de Recarga
       if (filteredHistory.length > 0) {
         const placeMap = {};
         filteredHistory.forEach(e => {
@@ -2637,7 +2829,7 @@
     }
 
     // =========================================================================
-    // ESCÁNER AUTOMÁTICO DE TICKETS (OCR EN ESPAÑOL + PREPROCESADO DE IMAGEN)
+    // MOTOR OCR EN ESPAÑOL (TICKETS Y CAPTURAS EN MODO OSCURO MY CUPRA)
     // =========================================================================
     let ocrWorkerInstance = null;
 
@@ -2672,13 +2864,22 @@
           const ctx = canvas.getContext('2d');
           ctx.drawImage(img, 0, 0, w, h);
 
-          // Escala de grises + mejora de contraste para tickets térmicos
           const imgData = ctx.getImageData(0, 0, w, h);
           const d = imgData.data;
+
+          // Detectar si es captura en modo oscuro (ej. My CUPRA) para invertir a fondo blanco
+          let lumSum = 0;
+          const totalPixels = d.length / 4;
+          for (let i = 0; i < d.length; i += 4) {
+            lumSum += 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
+          }
+          const isDarkBg = (lumSum / totalPixels) < 115;
+
           const contrast = 1.45;
           const intercept = 128 * (1 - contrast);
           for (let i = 0; i < d.length; i += 4) {
-            const gray = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
+            let gray = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
+            if (isDarkBg) gray = 255 - gray;
             const adj = Math.min(255, Math.max(0, gray * contrast + intercept));
             d[i] = d[i + 1] = d[i + 2] = adj;
           }
@@ -2691,6 +2892,28 @@
         };
         img.src = url;
       });
+    }
+
+    async function runOcrOnFile(file, statusEl) {
+      const processedCanvas = await preprocessTicketImage(file);
+      statusEl.innerHTML = '⏳ Cargando lector OCR en español...';
+      const TesseractLib = await loadTesseractScript();
+
+      if (!ocrWorkerInstance) {
+        ocrWorkerInstance = await TesseractLib.createWorker('spa', 1, {
+          logger: (m) => {
+            if (m.status === 'recognizing text') {
+              const pct = Math.round((m.progress || 0) * 100);
+              statusEl.innerHTML = `🔍 Leyendo imagen... <strong>${pct}%</strong>`;
+            }
+          }
+        });
+      } else {
+        statusEl.innerHTML = '🔍 Leyendo imagen...';
+      }
+
+      const { data } = await ocrWorkerInstance.recognize(processedCanvas);
+      return data.text || '';
     }
 
     function parseSpanishNumber(raw) {
@@ -2771,14 +2994,12 @@
       const upper = rawText.toUpperCase();
       const detectedNotes = [];
 
-      // 1. Fecha
       const foundDate = extractDateFromText(rawText);
       if (foundDate) {
         document.getElementById('entry-date').value = foundDate;
         detectedNotes.push(`Fecha: ${formatDateES(foundDate)}`);
       }
 
-      // 2. Establecimiento / Punto de recarga
       const foundPlace = detectPlaceFromText(upper, type);
       if (foundPlace) {
         if (type === 'gas') {
@@ -2854,7 +3075,6 @@
           detectedNotes.push(`Total: ${fmtEur(total)}`);
         }
       } else {
-        // RECARGA ELÉCTRICA (kWh, tarifa, total)
         let kwh = NaN;
         let rate = NaN;
         let total = NaN;
@@ -2926,25 +3146,8 @@
       statusEl.innerHTML = '⏳ Mejorando contraste de la imagen del ticket...';
 
       try {
-        const processedCanvas = await preprocessTicketImage(file);
-        statusEl.innerHTML = '⏳ Cargando lector OCR en español...';
-        const TesseractLib = await loadTesseractScript();
-
-        if (!ocrWorkerInstance) {
-          ocrWorkerInstance = await TesseractLib.createWorker('spa', 1, {
-            logger: (m) => {
-              if (m.status === 'recognizing text') {
-                const pct = Math.round((m.progress || 0) * 100);
-                statusEl.innerHTML = `🔍 Leyendo datos del ticket... <strong>${pct}%</strong>`;
-              }
-            }
-          });
-        } else {
-          statusEl.innerHTML = '🔍 Leyendo datos del ticket...';
-        }
-
-        const { data } = await ocrWorkerInstance.recognize(processedCanvas);
-        const notes = applyParsedTicketData(data.text || '');
+        const text = await runOcrOnFile(file, statusEl);
+        const notes = applyParsedTicketData(text);
 
         if (notes.length > 0) {
           statusEl.className = 'scan-status ok';
@@ -2962,7 +3165,147 @@
       }
     }
 
-    // MODALES Y FORMULARIOS
+    // =========================================================================
+    // IMPORTACIÓN Y LECTURA AUTOMÁTICA DE CAPTURA MY CUPRA (DATOS MENSUALES)
+    // =========================================================================
+    function openCupraStatsModal() {
+      const selectedMonth = document.getElementById('month-picker').value || new Date().toISOString().slice(0, 7);
+      document.getElementById('cupra-stat-month').value = selectedMonth;
+      document.getElementById('cupra-scan-status').style.display = 'none';
+      document.getElementById('cupra-file-input').value = '';
+      loadCupraMonthIntoForm();
+      document.getElementById('cupra-stats-modal').classList.add('open');
+    }
+
+    function loadCupraMonthIntoForm() {
+      const ym = document.getElementById('cupra-stat-month').value;
+      const existing = appState.cupraMonthly[ym] || {};
+      document.getElementById('cupra-stat-fuel').value = existing.fuelL100 ?? '';
+      document.getElementById('cupra-stat-ev').value = existing.evKwh100 ?? '';
+      document.getElementById('cupra-stat-km').value = existing.distanceKm ?? '';
+      document.getElementById('cupra-stat-speed').value = existing.avgSpeed ?? '';
+      document.getElementById('cupra-stat-duration').value = existing.duration ?? '';
+    }
+
+    function parseCupraScreenshotText(rawText) {
+      const notes = [];
+
+      // 1. Consumo medio de combustible (ej. "2,1 l/100 km" — OCR suele leer "l" como "1" o "I")
+      const fuelMatch = rawText.match(/(?:combustible[\s\S]{0,35}?)(\d{1,2}[.,]\d{1,2})\s*(?:l|1|i|L)\s*\/\s*100/i)
+        || rawText.match(/(\d{1,2}[.,]\d{1,2})\s*(?:l|1|i|L)\s*\/\s*100\s*km/i);
+      if (fuelMatch) {
+        const fuelVal = parseSpanishNumber(fuelMatch[1]);
+        if (!isNaN(fuelVal) && fuelVal >= 0 && fuelVal <= 25) {
+          document.getElementById('cupra-stat-fuel').value = fuelVal.toFixed(1);
+          notes.push(`${fmtNum(fuelVal, 1)} L/100`);
+        }
+      }
+
+      // 2. Consumo medio de energía (ej. "11,2 kwh/100 km")
+      const evMatch = rawText.match(/(\d{1,2}[.,]\d{1,2})\s*kwh\s*\/\s*100/i);
+      if (evMatch) {
+        const evVal = parseSpanishNumber(evMatch[1]);
+        if (!isNaN(evVal) && evVal >= 0 && evVal <= 60) {
+          document.getElementById('cupra-stat-ev').value = evVal.toFixed(1);
+          notes.push(`${fmtNum(evVal, 1)} kWh/100`);
+        }
+      }
+
+      // 3. Duración del viaje (ej. "17 h 39 min")
+      const durMatch = rawText.match(/(\d{1,3})\s*h\s*(\d{1,2})\s*min/i);
+      if (durMatch) {
+        const durStr = `${Number(durMatch[1])} h ${String(durMatch[2]).padStart(2, '0')} min`;
+        document.getElementById('cupra-stat-duration').value = durStr;
+        notes.push(durStr);
+      }
+
+      // 4. Distancia recorrida (ej. "Distancia recorrida 767 km")
+      const distMatch = rawText.match(/(?:distancia\s*recorrida[\s\S]{0,25}?)(\d{1,5})\s*km\b/i)
+        || rawText.match(/\b(\d{2,5})\s*km\b(?!\s*\/)/i);
+      if (distMatch) {
+        const distVal = parseInt(distMatch[1], 10);
+        if (!isNaN(distVal) && distVal > 0 && distVal <= 30000) {
+          document.getElementById('cupra-stat-km').value = distVal;
+          notes.push(`${distVal.toLocaleString('es-ES')} km`);
+        }
+      }
+
+      // 5. Velocidad media (ej. "43,5 km/h")
+      const speedMatch = rawText.match(/(\d{1,3}[.,]\d{1,2})\s*km\s*\/\s*h/i);
+      if (speedMatch) {
+        const speedVal = parseSpanishNumber(speedMatch[1]);
+        if (!isNaN(speedVal) && speedVal > 0 && speedVal <= 220) {
+          document.getElementById('cupra-stat-speed').value = speedVal.toFixed(1);
+          notes.push(`${fmtNum(speedVal, 1)} km/h`);
+        }
+      }
+
+      return notes;
+    }
+
+    async function handleCupraScreenshotUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const btn = document.getElementById('btn-scan-cupra');
+      const statusEl = document.getElementById('cupra-scan-status');
+      btn.disabled = true;
+      statusEl.style.display = 'block';
+      statusEl.className = 'scan-status';
+      statusEl.innerHTML = '⏳ Procesando captura de My CUPRA...';
+
+      try {
+        const text = await runOcrOnFile(file, statusEl);
+        const notes = parseCupraScreenshotText(text);
+
+        if (notes.length > 0) {
+          statusEl.className = 'scan-status ok';
+          statusEl.innerHTML = `✅ <strong>Captura leída:</strong> ${notes.join(' · ')}<br><span style="opacity:0.85;">Comprueba el mes y pulsa <strong>Guardar Datos del Mes</strong>.</span>`;
+        } else {
+          statusEl.className = 'scan-status warn';
+          statusEl.innerHTML = '⚠️ No se pudieron leer los datos de la captura. Puedes introducirlos manualmente en los campos de abajo.';
+        }
+      } catch (err) {
+        statusEl.className = 'scan-status warn';
+        statusEl.innerHTML = `⚠️ ${err.message || 'Error al leer la captura.'}`;
+      } finally {
+        btn.disabled = false;
+        event.target.value = '';
+      }
+    }
+
+    function saveCupraMonthlyStats(e) {
+      e.preventDefault();
+      const ym = document.getElementById('cupra-stat-month').value;
+      if (!ym) return;
+
+      const fuelRaw = document.getElementById('cupra-stat-fuel').value;
+      const evRaw = document.getElementById('cupra-stat-ev').value;
+      const kmRaw = document.getElementById('cupra-stat-km').value;
+      const speedRaw = document.getElementById('cupra-stat-speed').value;
+      const durationRaw = document.getElementById('cupra-stat-duration').value.trim();
+
+      appState.cupraMonthly[ym] = {
+        fuelL100: fuelRaw !== '' ? parseFloat(fuelRaw) : '',
+        evKwh100: evRaw !== '' ? parseFloat(evRaw) : '',
+        distanceKm: kmRaw !== '' ? parseInt(kmRaw, 10) : '',
+        avgSpeed: speedRaw !== '' ? parseFloat(speedRaw) : '',
+        duration: durationRaw
+      };
+
+      document.getElementById('month-picker').value = ym;
+      closeModal('cupra-stats-modal');
+      saveState();
+    }
+
+    function deleteCupraMonthlyStats(ym) {
+      if (confirm('¿Eliminar los datos de My CUPRA de este mes?')) {
+        delete appState.cupraMonthly[ym];
+        saveState();
+      }
+    }
+
+    // MODALES Y FORMULARIOS DE REPOSTAJE / RECARGA
     function openEntryModal(type, existing = null) {
       document.getElementById('entry-form').reset();
       document.getElementById('entry-id').value = existing ? existing.id : '';
@@ -3263,7 +3606,11 @@
         try {
           const parsed = JSON.parse(e.target.result);
           if (parsed && Array.isArray(parsed.entries)) {
-            appState = { ...appState, ...parsed };
+            appState = {
+              ...appState,
+              ...parsed,
+              cupraMonthly: parsed.cupraMonthly || {}
+            };
             saveState();
             alert('Copia de seguridad restaurada correctamente.');
           } else {
@@ -3293,6 +3640,13 @@
         { id: '3', type: 'ev', date: `${ym}-08`, odo: 4540, qty: 18.0, unitPrice: 0.38, total: 0.00, useBono: true, mode: 'Eléctrico / Ciudad', batStart: 10, batEnd: 100, place: 'Repsol (Waylet)' },
         { id: '4', type: 'gas', date: `${ym}-12`, odo: 4890, qty: 24.5, unitPrice: 1.479, total: 36.24, mode: 'Mixto', fullTank: true, place: 'EsclatOil' }
       ];
+      appState.cupraMonthly[ym] = {
+        fuelL100: 2.1,
+        evKwh100: 11.2,
+        distanceKm: 767,
+        avgSpeed: 43.5,
+        duration: '17 h 39 min'
+      };
       saveState();
     }
 
@@ -3300,6 +3654,7 @@
       if (confirm('¿Seguro que quieres borrar todos los registros?')) {
         appState.entries = [];
         appState.manualOdo = 0;
+        appState.cupraMonthly = {};
         saveState();
       }
     }
